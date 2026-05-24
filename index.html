@@ -621,7 +621,7 @@ hide('connectScreen'); hide('app');
     return;
   }
   hide('authScreen');
-
+document.getElementById('app').style.display = 'block';
   // Check invite code in URL
   var urlParams = new URLSearchParams(window.location.search);
   var inviteCode = urlParams.get('invite');
