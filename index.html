@@ -604,7 +604,7 @@ async function autoConnect(code) {
       });
     }
     await batch.commit();
-    window.history.replaceState({}, '', '/');
+    window.history.replaceState({}, '', './');
     loadApp();
   } catch(e) {
     loadApp();
