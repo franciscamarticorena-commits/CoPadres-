@@ -615,7 +615,9 @@ async function autoConnect(code) {
 auth.onAuthStateChanged(function(u) {
   USER = u;
   if (!u) {
-    show('authScreen'); hide('connectScreen'); hide('app');
+    show('authScreen');
+document.getElementById('authScreen').style.display = 'flex';
+hide('connectScreen'); hide('app');
     return;
   }
   hide('authScreen');
