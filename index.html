@@ -577,7 +577,7 @@ async function doReset() {
 function showConnectScreen() {
   hide('authScreen'); hide('app'); show('connectScreen');
   if (USERDATA && USERDATA.inviteCode) {
-    var link = 'https://copadres-kindflo.netlify.app?invite=' + USERDATA.inviteCode;
+    var link = 'https://franciscamarticorena-commits.github.io/CoPadres-/?invite=' + USERDATA.inviteCode;
     $('inviteLinkDisplay').textContent = link;
     $('whatsappBtn').onclick = function() {
       var msg = encodeURIComponent('Hola! Te invito a conectarte en CoPadres para coordinar mejor los temas de nuestros hijos. Entra aqui: ' + link);
