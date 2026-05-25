@@ -5,108 +5,377 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>CoPadres by Kindflo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',sans-serif;}
-body{background:#F4F4F0;color:#111;min-height:100vh;}
-button{cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,0);touch-action:manipulation;}
-.hidden{display:none!important;}
-#authScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
-.authBox{background:#fff;border-radius:16px;padding:28px 24px;width:100%;max-width:400px;box-shadow:0 4px 24px rgba(0,0,0,.1);}
-.logo{text-align:center;margin-bottom:24px;}
-.logo-icon{width:52px;height:52px;background:#6B7445;border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;}
-.logo h1{font-size:24px;font-weight:800;color:#111;}
-.logo p{font-size:11px;color:#9A9A94;letter-spacing:1px;text-transform:uppercase;}
-.tabs{display:flex;background:#EEEDE8;border-radius:10px;padding:3px;margin-bottom:20px;}
-.tabs button{flex:1;padding:9px;border:none;border-radius:8px;font-weight:600;font-size:13px;background:transparent;color:#5A5A55;}
-.tabs button.active{background:#fff;color:#6B7445;}
-.field{margin-bottom:12px;}
-.field label{display:block;font-size:11px;font-weight:700;color:#5A5A55;margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px;}
-.field input,.field select{width:100%;padding:10px 13px;border-radius:9px;border:1px solid #DDD;font-size:14px;color:#111;outline:none;background:#fff;}
-.btn-primary{width:100%;background:#6B7445;color:#fff;border:none;border-radius:9px;padding:12px;font-weight:700;font-size:14px;margin-top:4px;}
-.btn-secondary{background:transparent;color:#5A5A55;border:1px solid #DDD;border-radius:8px;padding:8px 14px;font-weight:600;font-size:13px;}
-.msg-error{background:#FEE8E8;color:#B94040;border-radius:8px;padding:9px 13px;font-size:12px;margin-bottom:12px;}
-.msg-ok{background:#EEF0E6;color:#6B7445;border-radius:8px;padding:9px 13px;font-size:12px;margin-bottom:12px;}
-.link-btn{background:none;border:none;color:#6B7445;font-size:12px;font-weight:600;}
-#connectScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
-.connectBox{background:#fff;border-radius:16px;padding:28px 24px;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,.1);}
-#app{display:none;}
-header{background:linear-gradient(135deg,#4D5530,#6B7445);padding:14px 16px 0;}
-.header-top{display:flex;justify-content:space-between;align-items:center;max-width:860px;margin:0 auto;}
-.header-brand h1{color:#fff;font-size:18px;font-weight:800;margin:0;}
-.header-brand p{color:rgba(255,255,255,.5);font-size:10px;letter-spacing:.5px;text-transform:uppercase;}
-.header-actions{display:flex;gap:6px;}
-.icon-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:8px;width:32px;height:32px;color:rgba(255,255,255,.9);font-size:12px;display:flex;align-items:center;justify-content:center;}
-nav{display:flex;gap:1px;padding:12px 10px 0;max-width:860px;margin:0 auto;overflow-x:auto;}
-nav button{flex:0 0 auto;padding:8px 12px;border:none;border-radius:8px 8px 0 0;font-size:12px;font-weight:400;background:transparent;color:rgba(255,255,255,.7);}
-nav button.active{background:#F4F4F0;color:#6B7445;font-weight:700;}
-main{max-width:860px;margin:0 auto;padding:20px 14px 60px;}
-.card{background:#fff;border-radius:13px;box-shadow:0 2px 16px rgba(0,0,0,.07);border:1px solid #E8E8E3;overflow:hidden;margin-bottom:14px;}
-.card-body{padding:18px;}
-.section-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
-.section-title h2{font-size:18px;font-weight:700;color:#111;}
-.section-title p{font-size:13px;color:#5A5A55;margin-top:3px;}
-.badge{display:inline-block;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:700;}
-.btn-sm{background:#6B7445;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;}
-.btn-outline{background:transparent;color:#5A5A55;border:1px solid #DDD;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;}
-.inp{padding:9px 12px;border-radius:9px;border:1px solid #DDD;font-size:13px;width:100%;box-sizing:border-box;outline:none;background:#fff;color:#111;}
-.sel{padding:9px 12px;border-radius:9px;border:1px solid #DDD;font-size:13px;background:#fff;color:#111;outline:none;}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.form-box{background:#EEEDE8;border-radius:11px;padding:16px;margin-bottom:14px;border:1px solid #DDDDD8;}
-.lbl{font-size:10px;font-weight:700;color:#5A5A55;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
-.cal-day-name{text-align:center;font-size:10px;font-weight:700;color:#9A9A94;padding:3px 0;}
-.cal-day{border-radius:8px;padding:6px 2px;min-height:36px;text-align:center;font-size:11px;border:1px solid #E8E8E3;background:#EEEDE8;position:relative;}
-.cal-day.today{border:2px solid #C4622D;font-weight:800;}
-.cal-day.selected{border:2px solid #6B7445;}
-.cal-day.mama{background:#B5472A20;}
-.cal-day.papa{background:#3D3D3D20;}
-.cal-day.both{background:#8A8A7820;}
-.custody-legend{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:12px;}
-.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;background:#fff;border-radius:7px;padding:4px 10px;border:1px solid #E8E8E3;}
-.dot{width:8px;height:8px;border-radius:2px;display:inline-block;}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
-.stat-card{background:#fff;border-radius:11px;padding:12px 14px;border:1px solid #E8E8E3;border-top:3px solid;}
-.stat-label{font-size:10px;color:#5A5A55;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px;}
-.stat-val{font-size:16px;font-weight:800;color:#111;}
-.exp-row{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:1px solid #E8E8E3;}
-.period-filter{display:flex;border-radius:9px;border:1px solid #DDD;overflow:hidden;margin-bottom:14px;}
-.period-filter button{flex:1;padding:8px 4px;border:none;font-size:12px;background:#fff;color:#5A5A55;}
-.period-filter button.active{background:#6B7445;color:#fff;font-weight:700;}
-.msg-list{padding:14px;min-height:220px;max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;}
-.msg-bubble{max-width:75%;padding:9px 13px;font-size:13px;line-height:1.45;}
-.msg-bubble.me{background:#4D5530;color:#fff;border-radius:13px 13px 3px 13px;align-self:flex-end;}
-.msg-bubble.other{background:#EEEDE8;color:#111;border-radius:13px 13px 13px 3px;align-self:flex-start;}
-.msg-sender{font-size:10px;font-weight:700;margin-bottom:3px;opacity:.6;text-transform:uppercase;}
-.msg-time{font-size:10px;margin-top:4px;opacity:.45;text-align:right;}
-.kid-avatar{width:52px;height:52px;background:#6B7445;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;flex-shrink:0;}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
-.info-item{background:#EEEDE8;border-radius:9px;padding:9px 11px;border:1px solid #E8E8E3;}
-.info-item-label{font-size:10px;color:#9A9A94;font-weight:600;text-transform:uppercase;margin-bottom:2px;}
-.info-item-val{font-size:12px;font-weight:600;color:#111;}
-.rem-row{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;border-bottom:1px solid #E8E8E3;}
-.rem-title{font-weight:700;font-size:13px;color:#111;margin-bottom:3px;}
-.rem-meta{font-size:11px;color:#9A9A94;}
-.resource-card{background:#fff;border-radius:13px;padding:18px;border:1px solid #E8E8E3;margin-bottom:12px;display:flex;gap:14px;}
-.resource-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
-.resource-title{font-weight:700;font-size:14px;margin-bottom:2px;}
-.resource-sub{font-size:11px;color:#9A9A94;margin-bottom:6px;}
-.resource-desc{font-size:12px;color:#5A5A55;line-height:1.6;margin-bottom:10px;}
-.resource-link{background:#6B7445;color:#fff;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;text-decoration:none;display:inline-block;}
-footer{text-align:center;padding:14px;font-size:11px;color:#9A9A94;border-top:1px solid #E8E8E3;}
+/* --- TOKENS ----------------------------------------------- */
+:root {
+  --bg:        #F8F6F1;
+  --surface:   #FFFFFF;
+  --primary:   #5F7C6E;
+  --primary-d: #365449;
+  --accent:    #D8895C;
+  --beige:     #E7DDCF;
+  --text:      #26332D;
+  --text-s:    #6D766F;
+  --border:    #E6E1D8;
+  --success:   #7A9B76;
+  --warn:      #D8A45F;
+  --error:     #B85C5C;
+  --r-card:    18px;
+  --r-btn:     12px;
+  --r-inp:     11px;
+  --shadow:    0 2px 16px rgba(38,51,45,.06);
+  --shadow-md: 0 6px 28px rgba(38,51,45,.1);
+  --font:      'DM Sans', sans-serif;
+  --font-d:    'DM Serif Display', serif;
+}
+
+/* — RESET ———————————————— */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(–font); background: var(–bg); color: var(–text); min-height: 100vh; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+button { cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+input, select, textarea { font-family: inherit; }
+.hidden { display: none !important; }
+
+/* — AUTH SCREEN —————————————–– */
+#authScreen {
+display: flex; align-items: center; justify-content: center;
+min-height: 100vh; padding: 20px;
+background: var(–bg);
+}
+.authBox {
+background: var(–surface); border-radius: var(–r-card);
+padding: 36px 32px; width: 100%; max-width: 400px;
+box-shadow: var(–shadow-md); border: 1px solid var(–border);
+}
+.logo { text-align: center; margin-bottom: 28px; }
+.logo-mark {
+width: 60px; height: 60px; background: var(–primary);
+border-radius: 18px; display: flex; align-items: center; justify-content: center;
+margin: 0 auto 14px; box-shadow: 0 4px 16px rgba(95,124,110,.3);
+}
+.logo-mark svg { color: #fff; width: 28px; height: 28px; }
+.logo h1 { font-family: var(–font-d); font-size: 26px; color: var(–primary-d); letter-spacing: -.3px; }
+.logo p { font-size: 11px; color: var(–text-s); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 3px; }
+
+/* Auth tabs */
+.tabs {
+display: flex; background: var(–bg); border-radius: 10px;
+padding: 3px; margin-bottom: 22px; border: 1px solid var(–border);
+}
+.tabs button {
+flex: 1; padding: 9px; border: none; border-radius: 8px;
+font-weight: 600; font-size: 13px; background: transparent; color: var(–text-s);
+transition: all .18s;
+}
+.tabs button.active { background: var(–surface); color: var(–primary); box-shadow: 0 1px 6px rgba(38,51,45,.1); }
+
+/* Form fields */
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 11px; font-weight: 600; color: var(–text-s); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .4px; }
+.field input, .field select {
+width: 100%; padding: 11px 14px; border-radius: var(–r-inp);
+border: 1.5px solid var(–border); font-size: 14px; color: var(–text);
+outline: none; background: var(–bg); transition: border-color .18s;
+}
+.field input:focus, .field select:focus { border-color: var(–primary); background: var(–surface); }
+
+.btn-primary {
+width: 100%; background: var(–primary); color: #fff; border: none;
+border-radius: var(–r-btn); padding: 13px; font-weight: 700; font-size: 14px;
+margin-top: 4px; transition: background .18s, transform .1s, box-shadow .18s;
+box-shadow: 0 2px 12px rgba(95,124,110,.28);
+}
+.btn-primary:hover { background: var(–primary-d); box-shadow: 0 4px 18px rgba(95,124,110,.35); }
+.btn-primary:active { transform: scale(.98); }
+
+.btn-secondary {
+background: transparent; color: var(–text-s); border: 1.5px solid var(–border);
+border-radius: var(–r-btn); padding: 9px 16px; font-weight: 600; font-size: 13px;
+transition: all .18s;
+}
+.btn-secondary:hover { border-color: var(–primary); color: var(–primary); }
+
+.link-btn { background: none; border: none; color: var(–primary); font-size: 12px; font-weight: 600; font-family: inherit; }
+.link-btn:hover { text-decoration: underline; }
+
+.msg-error { background: #FBF0F0; color: var(–error); border-radius: 9px; padding: 10px 14px; font-size: 12px; margin-bottom: 12px; border: 1px solid #E8C8C8; }
+.msg-ok { background: #EEF5ED; color: var(–success); border-radius: 9px; padding: 10px 14px; font-size: 12px; margin-bottom: 12px; border: 1px solid #C8DECB; }
+
+/* — CONNECT SCREEN –––––––––––––––––––– */
+#connectScreen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+.connectBox { background: var(–surface); border-radius: var(–r-card); padding: 36px 32px; width: 100%; max-width: 420px; box-shadow: var(–shadow-md); border: 1px solid var(–border); }
+.invite-box { background: var(–bg); border-radius: 13px; border: 1px solid var(–border); padding: 18px; margin-bottom: 18px; }
+.invite-link-display { background: var(–surface); border-radius: 9px; padding: 11px 14px; font-size: 12px; color: var(–text-s); word-break: break-all; border: 1px solid var(–border); margin-bottom: 12px; }
+.btn-whatsapp { width: 100%; background: #25D366; color: #fff; border: none; border-radius: var(–r-btn); padding: 13px; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background .18s; }
+.btn-whatsapp:hover { background: #1EBE57; }
+
+/* — APP HEADER –––––––––––––––––––––– */
+#app { display: none; }
+header {
+background: var(–surface); border-bottom: 1px solid var(–border);
+position: sticky; top: 0; z-index: 100;
+box-shadow: 0 1px 12px rgba(38,51,45,.06);
+}
+.header-inner { max-width: 880px; margin: 0 auto; padding: 0 16px; }
+.header-top { display: flex; justify-content: space-between; align-items: center; height: 60px; }
+.header-brand { display: flex; align-items: center; gap: 10px; }
+.header-logo { width: 34px; height: 34px; background: var(–primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.header-logo svg { width: 18px; height: 18px; color: #fff; }
+.header-title { font-family: var(–font-d); font-size: 20px; color: var(–primary-d); letter-spacing: -.2px; line-height: 1; }
+.header-sub-text { font-size: 10px; color: var(–text-s); letter-spacing: .3px; margin-top: 1px; }
+.header-actions { display: flex; gap: 6px; }
+.icon-btn {
+background: var(–bg); border: 1.5px solid var(–border); border-radius: 10px;
+width: 36px; height: 36px; color: var(–text-s); display: flex; align-items: center;
+justify-content: center; transition: all .18s;
+}
+.icon-btn:hover { border-color: var(–primary); color: var(–primary); background: var(–surface); }
+.icon-btn svg { width: 16px; height: 16px; }
+
+/* — NAVIGATION –––––––––––––––––––––– */
+nav {
+display: flex; gap: 2px; padding: 0 4px;
+overflow-x: auto; scrollbar-width: none;
+border-top: 1px solid var(–border);
+}
+nav::-webkit-scrollbar { display: none; }
+nav button {
+flex: 0 0 auto; padding: 10px 14px; border: none; border-radius: 0;
+font-size: 12px; font-weight: 500; background: transparent;
+color: var(–text-s); display: flex; align-items: center; gap: 6px;
+border-bottom: 2px solid transparent; transition: all .18s; white-space: nowrap;
+}
+nav button svg { width: 15px; height: 15px; flex-shrink: 0; }
+nav button.active { color: var(–primary); border-bottom-color: var(–primary); font-weight: 700; }
+nav button:hover:not(.active) { color: var(–text); background: var(–bg); }
+
+/* — MAIN ––––––––––––––––––––––––– */
+main { max-width: 880px; margin: 0 auto; padding: 24px 16px 80px; }
+
+/* — CARDS ———————————————–– */
+.card { background: var(–surface); border-radius: var(–r-card); box-shadow: var(–shadow); border: 1px solid var(–border); overflow: hidden; margin-bottom: 14px; }
+.card-body { padding: 20px; }
+
+/* — SECTION HEADER –––––––––––––––––––– */
+.section-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; }
+.section-title h2 { font-size: 20px; font-weight: 700; color: var(–text); letter-spacing: -.3px; }
+.section-title p { font-size: 13px; color: var(–text-s); margin-top: 3px; }
+
+/* — BADGES ———————————————— */
+.badge { display: inline-block; border-radius: 6px; padding: 2px 9px; font-size: 11px; font-weight: 600; }
+
+/* — BUTTONS ———————————————– */
+.btn-sm {
+background: var(–primary); color: #fff; border: none;
+border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 600;
+display: inline-flex; align-items: center; gap: 7px; transition: background .18s, transform .1s;
+font-family: inherit;
+}
+.btn-sm:hover { background: var(–primary-d); }
+.btn-sm:active { transform: scale(.97); }
+.btn-sm svg { width: 14px; height: 14px; }
+
+.btn-outline {
+background: transparent; color: var(–text-s); border: 1.5px solid var(–border);
+border-radius: 10px; padding: 8px 14px; font-size: 13px; font-weight: 500;
+display: inline-flex; align-items: center; gap: 6px; transition: all .18s;
+font-family: inherit;
+}
+.btn-outline:hover { border-color: var(–primary); color: var(–primary); }
+.btn-outline svg { width: 14px; height: 14px; }
+
+.btn-ghost {
+background: var(–bg); color: var(–text-s); border: 1px solid var(–border);
+border-radius: 9px; padding: 7px 12px; font-size: 12px; font-weight: 500;
+display: inline-flex; align-items: center; gap: 5px; transition: all .18s;
+font-family: inherit;
+}
+.btn-ghost:hover { background: var(–beige); color: var(–text); }
+.btn-ghost svg { width: 13px; height: 13px; }
+
+.btn-danger {
+background: #FBF0F0; color: var(–error); border: none;
+border-radius: 9px; width: 32px; height: 32px; display: flex;
+align-items: center; justify-content: center; transition: background .18s; flex-shrink: 0;
+}
+.btn-danger:hover { background: #F5D8D8; }
+.btn-danger svg { width: 14px; height: 14px; }
+
+/* — INPUTS ———————————————— */
+.inp {
+padding: 11px 14px; border-radius: var(–r-inp); border: 1.5px solid var(–border);
+font-size: 13px; width: 100%; outline: none; background: var(–bg);
+color: var(–text); transition: border-color .18s; font-family: inherit;
+}
+.inp:focus { border-color: var(–primary); background: var(–surface); }
+.sel {
+padding: 11px 14px; border-radius: var(–r-inp); border: 1.5px solid var(–border);
+font-size: 13px; background: var(–bg); color: var(–text); outline: none;
+font-family: inherit; transition: border-color .18s; cursor: pointer;
+}
+.sel:focus { border-color: var(–primary); background: var(–surface); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-box { background: var(–bg); border-radius: 14px; padding: 20px; margin-bottom: 16px; border: 1px solid var(–border); }
+.lbl { font-size: 11px; font-weight: 600; color: var(–text-s); display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .4px; }
+
+/* — CALENDAR ––––––––––––––––––––––– */
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+.cal-day-name { text-align: center; font-size: 10px; font-weight: 600; color: var(–text-s); padding: 4px 0; letter-spacing: .3px; }
+.cal-day {
+border-radius: 10px; padding: 6px 2px; min-height: 40px;
+text-align: center; font-size: 12px; border: 1.5px solid var(–border);
+background: var(–bg); position: relative; cursor: pointer;
+transition: all .15s; color: var(–text);
+}
+.cal-day:hover { border-color: var(–primary); background: var(–surface); }
+.cal-day.today { border-color: var(–accent); font-weight: 700; color: var(–accent); }
+.cal-day.selected { border-color: var(–primary); background: rgba(95,124,110,.08); box-shadow: 0 0 0 3px rgba(95,124,110,.12); }
+.cal-day.mama { background: rgba(216,137,92,.1); border-color: rgba(216,137,92,.25); }
+.cal-day.papa { background: rgba(54,84,73,.08); border-color: rgba(54,84,73,.2); }
+.cal-day.both { background: rgba(120,130,120,.1); border-color: rgba(120,130,120,.25); }
+
+.custody-legend { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; background: var(–surface); border-radius: 8px; padding: 6px 12px; border: 1px solid var(–border); color: var(–text-s); }
+.dot { width: 8px; height: 8px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
+
+/* — DAY DETAIL –––––––––––––––––––––– */
+.day-detail {
+margin-top: 16px; background: var(–bg); border-radius: 13px;
+padding: 16px; border: 1px solid var(–border);
+}
+.day-detail-title { font-weight: 700; font-size: 13px; color: var(–primary); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.day-detail-title svg { width: 15px; height: 15px; }
+
+/* — STATS ———————————————–– */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.stat-card { background: var(–surface); border-radius: 13px; padding: 14px 16px; border: 1px solid var(–border); border-top: 3px solid; }
+.stat-label { font-size: 10px; color: var(–text-s); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; }
+.stat-val { font-size: 17px; font-weight: 700; color: var(–text); }
+
+/* — PERIOD FILTER —————————————– */
+.period-filter { display: flex; border-radius: 10px; border: 1.5px solid var(–border); overflow: hidden; margin-bottom: 16px; background: var(–surface); }
+.period-filter button { flex: 1; padding: 9px 4px; border: none; font-size: 12px; background: transparent; color: var(–text-s); font-family: inherit; font-weight: 500; transition: all .15s; }
+.period-filter button.active { background: var(–primary); color: #fff; font-weight: 700; }
+
+/* — BALANCE BAR —————————————–– */
+.balance-bar { background: var(–bg); border-radius: 11px; padding: 13px 16px; margin-bottom: 16px; border: 1px solid var(–border); font-size: 13px; color: var(–text-s); }
+
+/* — EXPENSE ROWS —————————————— */
+.exp-row { display: flex; justify-content: space-between; align-items: center; padding: 13px 18px; border-bottom: 1px solid var(–border); gap: 10px; }
+.exp-row:last-child { border-bottom: none; }
+
+/* — UF BANNER ——————————————— */
+.uf-banner { background: var(–bg); border-radius: 11px; padding: 13px 16px; margin-bottom: 16px; border: 1px solid var(–border); }
+.uf-label { font-size: 10px; color: var(–text-s); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 4px; }
+.uf-val { font-size: 16px; font-weight: 700; color: var(–text); }
+
+/* — CURRENCY TOGGLE ————————————— */
+.currency-toggle { display: flex; border-radius: 10px; border: 1.5px solid var(–border); overflow: hidden; background: var(–surface); }
+.currency-toggle button { flex: 1; padding: 10px; border: none; font-size: 12px; font-weight: 700; background: transparent; color: var(–text-s); font-family: inherit; transition: all .15s; }
+.currency-toggle button.cur-active { background: var(–primary); color: #fff; }
+
+/* — MESSAGES ––––––––––––––––––––––– */
+.msg-list { padding: 16px; min-height: 220px; max-height: 360px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.msg-bubble { max-width: 78%; padding: 10px 14px; font-size: 13px; line-height: 1.5; }
+.msg-bubble.me { background: var(–primary); color: #fff; border-radius: 16px 16px 4px 16px; align-self: flex-end; }
+.msg-bubble.other { background: var(–bg); color: var(–text); border-radius: 16px 16px 16px 4px; align-self: flex-start; border: 1px solid var(–border); }
+.msg-sender { font-size: 10px; font-weight: 700; margin-bottom: 3px; opacity: .6; text-transform: uppercase; letter-spacing: .3px; }
+.msg-time { font-size: 10px; margin-top: 4px; opacity: .5; text-align: right; }
+.msg-input-row { display: flex; gap: 10px; align-items: center; }
+.msg-input-row .inp { flex: 1; border-radius: 24px; }
+.btn-send { background: var(–primary); color: #fff; border: none; border-radius: 24px; padding: 11px 20px; font-size: 13px; font-weight: 600; font-family: inherit; display: flex; align-items: center; gap: 6px; transition: background .18s; flex-shrink: 0; }
+.btn-send:hover { background: var(–primary-d); }
+.btn-send svg { width: 14px; height: 14px; }
+
+/* — QUICK REPLIES —————————————– */
+.quick-replies { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.quick-reply-btn { background: var(–surface); border: 1.5px solid var(–border); border-radius: 20px; padding: 6px 14px; font-size: 11px; color: var(–text-s); font-family: inherit; transition: all .15s; }
+.quick-reply-btn:hover { border-color: var(–primary); color: var(–primary); }
+
+/* — CHILDREN ––––––––––––––––––––––– */
+.kid-avatar { width: 52px; height: 52px; background: var(–primary); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; color: #fff; flex-shrink: 0; font-family: var(–font-d); }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.info-item { background: var(–bg); border-radius: 10px; padding: 10px 13px; border: 1px solid var(–border); }
+.info-item-label { font-size: 10px; color: var(–text-s); font-weight: 600; text-transform: uppercase; letter-spacing: .3px; margin-bottom: 3px; }
+.info-item-val { font-size: 12px; font-weight: 600; color: var(–text); }
+
+/* — AGREEMENTS –––––––––––––––––––––– */
+.agr-header { padding: 15px 18px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; cursor: pointer; }
+.agr-body { padding: 0 18px 16px; background: var(–bg); border-top: 1px solid var(–border); }
+.agr-content { font-size: 13px; color: var(–text-s); line-height: 1.65; padding: 14px; }
+
+/* — REMINDERS ——————————————— */
+.rem-row { display: flex; justify-content: space-between; align-items: center; padding: 13px 18px; border-bottom: 1px solid var(–border); gap: 12px; }
+.rem-row:last-child { border-bottom: none; }
+.rem-title { font-weight: 600; font-size: 13px; color: var(–text); margin-bottom: 3px; }
+.rem-meta { font-size: 11px; color: var(–text-s); }
+.btn-done { background: var(–bg); border: 1.5px solid var(–border); border-radius: 9px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; transition: all .15s; flex-shrink: 0; color: var(–success); }
+.btn-done:hover { background: #EEF5ED; border-color: var(–success); }
+.btn-done svg { width: 14px; height: 14px; }
+.btn-undo { background: var(–bg); border: 1px solid var(–border); border-radius: 8px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: var(–text-s); transition: all .15s; }
+.btn-undo svg { width: 13px; height: 13px; }
+
+/* — RESOURCES ——————————————— */
+.resource-card { background: var(–surface); border-radius: 14px; padding: 18px; border: 1px solid var(–border); margin-bottom: 12px; display: flex; gap: 16px; box-shadow: var(–shadow); }
+.resource-icon { width: 48px; height: 48px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.resource-title { font-weight: 700; font-size: 14px; margin-bottom: 2px; color: var(–text); }
+.resource-sub { font-size: 11px; color: var(–text-s); margin-bottom: 7px; }
+.resource-desc { font-size: 12px; color: var(–text-s); line-height: 1.6; margin-bottom: 11px; }
+.resource-link { background: var(–primary); color: #fff; border-radius: 9px; padding: 7px 16px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-block; transition: background .18s; }
+.resource-link:hover { background: var(–primary-d); }
+
+/* Emergency call card */
+.emergency-card {
+background: linear-gradient(135deg, #8B2B2B, #B85C5C);
+border-radius: var(–r-card); padding: 18px 20px; margin-bottom: 16px;
+display: flex; align-items: center; gap: 16px; justify-content: space-between; flex-wrap: wrap;
+box-shadow: 0 4px 20px rgba(184,92,92,.25);
+}
+.emergency-card a { background: #fff; color: #B85C5C; border-radius: 10px; padding: 9px 20px; font-weight: 800; font-size: 13px; text-decoration: none; }
+
+/* — SECTION LABELS –––––––––––––––––––– */
+.section-lbl { margin: 0 0 9px; font-size: 10px; font-weight: 700; color: var(–text-s); text-transform: uppercase; letter-spacing: 1px; }
+
+/* — PROPOSAL ––––––––––––––––––––––– */
+.proposal-card { background: var(–bg); border: 1px solid rgba(95,124,110,.2); border-radius: 13px; padding: 14px 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+/* — TOGGLE STATUS —————————————– */
+.toggle-btn { border: none; border-radius: 6px; padding: 3px 9px; font-size: 10px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .15s; }
+
+/* — FOOTER ———————————————— */
+footer { text-align: center; padding: 16px; font-size: 11px; color: var(–text-s); border-top: 1px solid var(–border); }
+
+/* — NOTES BOX ——————————————— */
+.notes-box { background: rgba(95,124,110,.07); border-radius: 10px; padding: 12px 14px; margin-top: 12px; border-left: 3px solid var(–primary); }
+
+/* — EMPTY STATE —————————————–– */
+.empty-state { text-align: center; padding: 52px 20px; color: var(–text-s); font-size: 13px; }
+
+/* — INFO TIP ––––––––––––––––––––––– */
+.info-tip { background: rgba(95,124,110,.08); border-radius: 10px; padding: 11px 14px; margin-bottom: 14px; font-size: 12px; color: var(–primary-d); border: 1px solid rgba(95,124,110,.18); display: flex; align-items: center; gap: 8px; }
+.info-tip svg { width: 14px; height: 14px; flex-shrink: 0; }
 </style>
+
 </head>
 <body>
 
-<!-- AUTH -->
+<!-- ===========================================================
+     AUTH
+============================================================ -->
 
 <div id="authScreen">
   <div class="authBox">
     <div class="logo">
-      <div class="logo-icon">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="9" cy="7" r="3"/><circle cx="16" cy="7" r="3"/>
           <path d="M3 20c0-3.31 2.69-6 6-6s6 2.69 6 6"/>
           <path d="M19 18c0-2.21-1.34-4-3-4"/>
@@ -115,22 +384,26 @@ footer{text-align:center;padding:14px;font-size:11px;color:#9A9A94;border-top:1p
       <h1>CoPadres</h1>
       <p>by Kindflo</p>
     </div>
-    <div class="tabs">
-      <button id="tabLoginBtn" class="active">Ingresar</button>
-      <button id="tabRegisterBtn">Crear cuenta</button>
-    </div>
-    <div id="authMsg" class="hidden"></div>
 
+```
+<div class="tabs">
+  <button id="tabLoginBtn" class="active">Ingresar</button>
+  <button id="tabRegisterBtn">Crear cuenta</button>
+</div>
 
+<div id="authMsg" class="hidden"></div>
+
+<!-- LOGIN -->
 <div id="loginForm">
   <div class="field"><label>Correo</label><input type="email" id="loginEmail" placeholder="tu@correo.com"/></div>
   <div class="field"><label>Contraseña</label><input type="password" id="loginPass" placeholder="••••••••"/></div>
   <button class="btn-primary" id="loginBtn">Ingresar</button>
-  <p style="text-align:center;margin-top:10px">
+  <p style="text-align:center;margin-top:12px">
     <button class="link-btn" id="forgotBtn">¿Olvidaste tu contraseña?</button>
   </p>
 </div>
 
+<!-- REGISTRO -->
 <div id="registerForm" class="hidden">
   <div class="field"><label>Tu nombre</label><input type="text" id="regName" placeholder="María González"/></div>
   <div class="field"><label>Correo</label><input type="email" id="regEmail" placeholder="tu@correo.com"/></div>
@@ -145,7 +418,7 @@ footer{text-align:center;padding:14px;font-size:11px;color:#9A9A94;border-top:1p
     </select>
   </div>
   <div class="field">
-    <label>Yo soy...</label>
+    <label>Yo soy…</label>
     <select id="regRole">
       <option value="p1" id="roleP1Opt">Mamá</option>
       <option value="p2" id="roleP2Opt">Papá</option>
@@ -154,147 +427,206 @@ footer{text-align:center;padding:14px;font-size:11px;color:#9A9A94;border-top:1p
   <button class="btn-primary" id="registerBtn">Crear cuenta</button>
 </div>
 
+<!-- FORGOT -->
 <div id="forgotForm" class="hidden">
-  <p style="font-size:13px;color:#5A5A55;margin-bottom:14px;">Te enviaremos un enlace para restablecer tu contraseña.</p>
+  <p style="font-size:13px;color:var(--text-s);margin-bottom:16px">Te enviaremos un enlace para restablecer tu contraseña.</p>
   <div class="field"><label>Correo</label><input type="email" id="resetEmail" placeholder="tu@correo.com"/></div>
   <button class="btn-primary" id="resetBtn">Enviar enlace</button>
-  <p style="text-align:center;margin-top:10px">
+  <p style="text-align:center;margin-top:12px">
     <button class="link-btn" id="backBtn">← Volver</button>
   </p>
 </div>
-
+```
 
   </div>
 </div>
 
-<!-- CONNECT -->
+<!-- ===========================================================
+     CONNECT
+============================================================ -->
 
 <div id="connectScreen" class="hidden">
   <div class="connectBox">
-    <div class="logo" style="margin-bottom:16px">
-      <h1 style="font-size:20px">Invitar a co-padre/madre</h1>
-      <p style="font-size:12px;color:#5A5A55;text-transform:none;letter-spacing:0;margin-top:6px">
-        Envíale un link por WhatsApp para conectarse automáticamente
-      </p>
+    <div style="margin-bottom:22px">
+      <h2 style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:6px">Invitar a co-padre/madre</h2>
+      <p style="font-size:13px;color:var(--text-s)">Envíale un link por WhatsApp para conectarse automáticamente</p>
     </div>
-    <div style="background:#EEF0E6;border-radius:12px;margin-bottom:16px;padding:16px">
-      <p class="lbl" style="margin-bottom:8px">Tu link de invitación</p>
-      <div id="inviteLinkDisplay" style="background:#fff;border-radius:9px;padding:10px 13px;font-size:12px;color:#5A5A55;word-break:break-all;border:1px solid #DDD;margin-bottom:10px">
-        Generando link...
-      </div>
-      <button id="whatsappBtn" class="btn-primary" style="background:#25D366;margin-top:0">
-        💬 Invitar por WhatsApp
+    <div class="invite-box">
+      <p class="lbl" style="margin-bottom:9px">Tu link de invitación</p>
+      <div id="inviteLinkDisplay" class="invite-link-display">Generando link...</div>
+      <button id="whatsappBtn" class="btn-whatsapp">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        Invitar por WhatsApp
       </button>
     </div>
     <div id="connectMsg" class="hidden"></div>
-    <p style="text-align:center;margin-top:12px">
+    <p style="text-align:center;margin-top:14px">
       <button class="link-btn" id="skipBtn">Hacer esto más tarde</button>
     </p>
   </div>
 </div>
 
-<!-- APP -->
+<!-- ===========================================================
+     APP
+============================================================ -->
 
 <div id="app">
   <header>
-    <div class="header-top">
-      <div class="header-brand">
-        <h1>CoPadres</h1>
-        <p id="headerSub">by Kindflo</p>
+    <div class="header-inner">
+      <div class="header-top">
+        <div class="header-brand">
+          <div class="header-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="7" r="3"/><circle cx="16" cy="7" r="3"/>
+              <path d="M3 20c0-3.31 2.69-6 6-6s6 2.69 6 6"/>
+              <path d="M19 18c0-2.21-1.34-4-3-4"/>
+            </svg>
+          </div>
+          <div>
+            <div class="header-title">CoPadres</div>
+            <div class="header-sub-text" id="headerSub">by Kindflo</div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" id="inviteBtn" title="Invitar">
+            <i data-lucide="link" style="width:16px;height:16px"></i>
+          </button>
+          <button class="icon-btn" id="logoutBtn" title="Salir">
+            <i data-lucide="log-out" style="width:16px;height:16px"></i>
+          </button>
+        </div>
       </div>
-      <div class="header-actions">
-        <button class="icon-btn" id="inviteBtn" title="Invitar">🔗</button>
-        <button class="icon-btn" id="logoutBtn" title="Salir">🚪</button>
-      </div>
-    </div>
-    <nav id="mainNav">
-      <button class="active" data-tab="calendar">📅 Calendario</button>
-      <button data-tab="expenses">💰 Gastos</button>
-      <button data-tab="messages">💬 Mensajes</button>
-      <button data-tab="children">👧 Hijos</button>
-      <button data-tab="agreements">📄 Acuerdos</button>
-      <button data-tab="reminders">🔔 Recordatorios</button>
-      <button data-tab="recursos">🏛 Recursos</button>
-    </nav>
+
+```
+  <nav id="mainNav">
+    <button class="active" data-tab="calendar">
+      <i data-lucide="calendar-days"></i> Calendario
+    </button>
+    <button data-tab="expenses">
+      <i data-lucide="receipt-text"></i> Gastos
+    </button>
+    <button data-tab="messages">
+      <i data-lucide="message-circle"></i> Mensajes
+    </button>
+    <button data-tab="children">
+      <i data-lucide="users-round"></i> Hijos
+    </button>
+    <button data-tab="agreements">
+      <i data-lucide="folder-open"></i> Acuerdos
+    </button>
+    <button data-tab="reminders">
+      <i data-lucide="bell"></i> Recordatorios
+    </button>
+    <button data-tab="recursos">
+      <i data-lucide="landmark"></i> Recursos
+    </button>
+  </nav>
+</div>
+```
+
   </header>
 
   <main>
-    <!-- CALENDARIO -->
-    <div id="tab-calendar">
-      <div class="section-header">
-        <div class="section-title"><h2>Calendario de Custodia</h2><p>Planifica los días con tus hijos</p></div>
+
+```
+<!-- -- CALENDARIO ---------------------------------------- -->
+<div id="tab-calendar">
+  <div class="section-header">
+    <div class="section-title">
+      <h2>Calendario de Custodia</h2>
+      <p>Planifica los días con tus hijos</p>
+    </div>
+  </div>
+
+  <div class="custody-legend">
+    <div class="legend-item"><div class="dot" style="background:var(--accent)"></div><span id="leg1">Mamá</span></div>
+    <div class="legend-item"><div class="dot" style="background:var(--primary-d)"></div><span id="leg2">Papá</span></div>
+    <div class="legend-item"><div class="dot" style="background:#8A8A78"></div><span>Ambos</span></div>
+  </div>
+
+  <div id="pendingProposals"></div>
+
+  <div class="card">
+    <div class="card-body">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <button class="btn-outline" id="prevMonthBtn" style="padding:8px 12px">
+          <i data-lucide="chevron-left" style="width:16px;height:16px"></i>
+        </button>
+        <strong id="calMonthTitle" style="font-size:16px;color:var(--text)"></strong>
+        <button class="btn-outline" id="nextMonthBtn" style="padding:8px 12px">
+          <i data-lucide="chevron-right" style="width:16px;height:16px"></i>
+        </button>
       </div>
-      <div class="custody-legend">
-        <div class="legend-item"><div class="dot" style="background:#B5472A"></div><span id="leg1">Mamá</span></div>
-        <div class="legend-item"><div class="dot" style="background:#3D3D3D"></div><span id="leg2">Papá</span></div>
-        <div class="legend-item"><div class="dot" style="background:#8A8A78"></div><span>Ambos</span></div>
-      </div>
-      <div id="pendingProposals"></div>
-      <div class="card">
-        <div class="card-body">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-            <button class="btn-outline" id="prevMonthBtn">←</button>
-            <strong id="calMonthTitle" style="font-size:15px"></strong>
-            <button class="btn-outline" id="nextMonthBtn">→</button>
+      <div class="cal-grid" id="calDayNames"></div>
+      <div class="cal-grid" id="calGrid" style="margin-top:4px"></div>
+
+      <div id="dayDetail" class="day-detail hidden">
+        <div class="day-detail-title">
+          <i data-lucide="calendar-days"></i> Día <span id="detailDay"></span>
+        </div>
+        <div id="detailEvents" style="margin-bottom:10px"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-sm" id="cycleCustBtn">
+            <i data-lucide="refresh-ccw"></i> Cambiar custodia
+          </button>
+          <button class="btn-outline" id="toggleEvBtn">
+            <i data-lucide="plus"></i> Evento
+          </button>
+          <button class="btn-outline" id="togglePropBtn">
+            <i data-lucide="refresh-ccw"></i> Proponer cambio
+          </button>
+        </div>
+        <div id="evForm" class="hidden" style="margin-top:12px;display:flex;gap:8px">
+          <input class="inp" id="evInput" placeholder="Descripción del evento..." style="flex:1"/>
+          <button class="btn-sm" id="saveEvBtn">Guardar</button>
+        </div>
+        <div id="propForm" class="hidden" style="margin-top:12px;display:grid;gap:9px">
+          <div class="grid-2">
+            <input class="inp" type="number" id="propFrom" placeholder="Día actual"/>
+            <input class="inp" type="number" id="propTo" placeholder="Nuevo día"/>
           </div>
-          <div class="cal-grid" id="calDayNames"></div>
-          <div class="cal-grid" id="calGrid" style="margin-top:3px"></div>
-          <div id="dayDetail" class="hidden" style="margin-top:14px;background:#EEEDE8;border-radius:10px;padding:14px;border:1px solid #DDD">
-            <p style="font-weight:700;font-size:13px;color:#6B7445;margin-bottom:9px">📅 Día <span id="detailDay"></span></p>
-            <div id="detailEvents" style="margin-bottom:8px"></div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="btn-sm" id="cycleCustBtn">Cambiar custodia</button>
-              <button class="btn-outline" id="toggleEvBtn">+ Evento</button>
-              <button class="btn-outline" id="togglePropBtn">↔ Proponer cambio</button>
-            </div>
-            <div id="evForm" class="hidden" style="margin-top:10px;display:flex;gap:8px">
-              <input class="inp" id="evInput" placeholder="Descripción del evento..." style="flex:1"/>
-              <button class="btn-sm" id="saveEvBtn">Guardar</button>
-            </div>
-            <div id="propForm" class="hidden" style="margin-top:10px;display:grid;gap:8px">
-              <div class="grid-2">
-                <input class="inp" type="number" id="propFrom" placeholder="Día actual"/>
-                <input class="inp" type="number" id="propTo" placeholder="Nuevo día"/>
-              </div>
-              <input class="inp" id="propReason" placeholder="Razón del cambio"/>
-              <div style="display:flex;gap:8px">
-                <button class="btn-sm" id="savePropBtn">Enviar</button>
-                <button class="btn-outline" id="cancelPropBtn">Cancelar</button>
-              </div>
-            </div>
+          <input class="inp" id="propReason" placeholder="Razón del cambio"/>
+          <div style="display:flex;gap:8px">
+            <button class="btn-sm" id="savePropBtn">Enviar</button>
+            <button class="btn-outline" id="cancelPropBtn">Cancelar</button>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
-
-<!-- GASTOS -->
+<!-- -- GASTOS -------------------------------------------- -->
 <div id="tab-expenses" class="hidden">
   <div class="section-header">
     <div class="section-title"><h2>Gastos Compartidos</h2><p>Registro claro y transparente</p></div>
-    <button class="btn-sm" id="toggleExpBtn">+ Agregar</button>
+    <button class="btn-sm" id="toggleExpBtn"><i data-lucide="plus"></i> Agregar</button>
   </div>
-  <div style="background:#EEF0E6;border-radius:11px;padding:12px 16px;margin-bottom:14px;border:1px solid #6B744422">
-    <div style="font-size:10px;color:#9A9A94;font-weight:700;text-transform:uppercase;">Valor UF actual</div>
-    <div id="ufDisplay" style="font-size:17px;font-weight:800;color:#111">Cargando...</div>
+
+  <div class="uf-banner">
+    <div class="uf-label">Valor UF actual</div>
+    <div id="ufDisplay" class="uf-val">Cargando...</div>
   </div>
+
   <div class="period-filter">
     <button class="active" data-period="week">Semana</button>
     <button data-period="month">Mes</button>
     <button data-period="year">Año</button>
     <button data-period="all">Todo</button>
   </div>
+
   <div class="stat-grid" id="expStats"></div>
-  <div id="balanceBar" style="background:#EEEDE8;border-radius:10px;padding:12px 14px;margin-bottom:14px;border:1px solid #DDD;font-size:13px"></div>
+  <div id="balanceBar" class="balance-bar"></div>
+
   <div id="expForm" class="hidden form-box">
-    <p style="font-weight:700;font-size:14px;color:#6B7445;margin-bottom:12px">Agregar gasto</p>
-    <div style="display:grid;gap:10px">
-      <input class="inp" id="expDesc" placeholder="Descripción"/>
-      <div style="display:flex;border-radius:9px;border:1px solid #DDD;overflow:hidden">
-        <button id="btnCLP" style="flex:1;padding:9px;border:none;font-size:12px;font-weight:700;background:#6B7445;color:#fff">$ CLP</button>
-        <button id="btnUF" style="flex:1;padding:9px;border:none;font-size:12px;font-weight:700;background:#fff;color:#5A5A55">UF</button>
+    <p style="font-weight:700;font-size:15px;color:var(--primary);margin-bottom:14px">Agregar gasto</p>
+    <div style="display:grid;gap:11px">
+      <input class="inp" id="expDesc" placeholder="Descripción del gasto"/>
+      <div class="currency-toggle">
+        <button id="btnCLP" class="cur-active">$ CLP</button>
+        <button id="btnUF">UF</button>
       </div>
-      <div id="ufHint" class="hidden" style="background:#EEF0E6;border-radius:7px;padding:7px 10px;font-size:11px;color:#5A5A55"></div>
+      <div id="ufHint" class="hidden" style="background:rgba(95,124,110,.08);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--text-s)"></div>
       <div class="grid-2">
         <input class="inp" type="number" id="expAmount" placeholder="Monto"/>
         <select class="sel" id="expPaidBy">
@@ -312,42 +644,47 @@ footer{text-align:center;padding:14px;font-size:11px;color:#9A9A94;border-top:1p
       </div>
     </div>
   </div>
+
   <div class="card">
-    <div style="padding:13px 16px;border-bottom:1px solid #E8E8E3;font-weight:700;font-size:13px;display:flex;justify-content:space-between">
-      <span>Historial</span><span id="expCount" style="font-size:11px;color:#9A9A94;font-weight:400"></span>
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);font-weight:700;font-size:13px;display:flex;justify-content:space-between;align-items:center">
+      <span style="color:var(--text)">Historial</span>
+      <span id="expCount" style="font-size:11px;color:var(--text-s);font-weight:400"></span>
     </div>
     <div id="expList"></div>
   </div>
 </div>
 
-<!-- MENSAJES -->
+<!-- -- MENSAJES ------------------------------------------ -->
 <div id="tab-messages" class="hidden">
   <div class="section-header">
     <div class="section-title"><h2>Mensajes</h2><p>Comunicación enfocada en los niños</p></div>
   </div>
-  <div style="background:#EEF0E6;border-radius:9px;padding:10px 13px;margin-bottom:14px;font-size:12px;color:#6B7445;border:1px solid #6B744422">
-    💡 Mantén la comunicación enfocada en el bienestar de los niños.
+  <div class="info-tip">
+    <i data-lucide="info"></i>
+    Mantén la comunicación enfocada en el bienestar de los niños.
   </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px" id="quickReplies"></div>
-  <div class="card" style="margin-bottom:13px">
+  <div id="quickReplies" class="quick-replies"></div>
+  <div class="card" style="margin-bottom:14px">
     <div class="msg-list" id="msgList"></div>
   </div>
-  <div style="display:flex;gap:9px">
-    <input class="inp" id="msgInput" placeholder="Escribe un mensaje..." style="flex:1;border-radius:24px"/>
-    <button class="btn-sm" id="sendMsgBtn" style="border-radius:24px;padding:0 18px">Enviar ➤</button>
+  <div class="msg-input-row">
+    <input class="inp" id="msgInput" placeholder="Escribe un mensaje…"/>
+    <button class="btn-send" id="sendMsgBtn">
+      Enviar <i data-lucide="send"></i>
+    </button>
   </div>
 </div>
 
-<!-- HIJOS -->
+<!-- -- HIJOS --------------------------------------------- -->
 <div id="tab-children" class="hidden">
   <div class="section-header">
     <div class="section-title"><h2>Perfiles de Hijos</h2><p>Información importante</p></div>
-    <button class="btn-sm" id="openKidFormBtn">+ Agregar</button>
+    <button class="btn-sm" id="openKidFormBtn"><i data-lucide="plus"></i> Agregar</button>
   </div>
   <div id="kidForm" class="hidden form-box">
-    <p style="font-weight:700;font-size:14px;color:#6B7445;margin-bottom:12px" id="kidFormTitle">Agregar hijo</p>
+    <p style="font-weight:700;font-size:15px;color:var(--primary);margin-bottom:14px" id="kidFormTitle">Agregar hijo</p>
     <input type="hidden" id="editKidId"/>
-    <div style="display:grid;gap:9px">
+    <div style="display:grid;gap:10px">
       <div class="grid-2">
         <div><label class="lbl">Nombre</label><input class="inp" id="kidName" placeholder="Nombre completo"/></div>
         <div><label class="lbl">Edad</label><input class="inp" type="number" id="kidAge" placeholder="Años"/></div>
@@ -360,7 +697,7 @@ footer{text-align:center;padding:14px;font-size:11px;color:#9A9A94;border-top:1p
         <div><label class="lbl">Alergias</label><input class="inp" id="kidAllergies" placeholder="Alergias conocidas"/></div>
         <div><label class="lbl">Tipo de sangre</label><input class="inp" id="kidBlood" placeholder="Ej: O+"/></div>
       </div>
-      <div><label class="lbl">Notas</label><textarea class="inp" id="kidNotes" placeholder="Información importante..." style="min-height:60px;resize:vertical"></textarea></div>
+      <div><label class="lbl">Notas</label><textarea class="inp" id="kidNotes" placeholder="Información importante…" style="min-height:64px;resize:vertical"></textarea></div>
       <div style="display:flex;gap:8px">
         <button class="btn-sm" id="saveKidBtn">Guardar</button>
         <button class="btn-outline" id="cancelKidBtn">Cancelar</button>
@@ -370,21 +707,21 @@ footer{text-align:center;padding:14px;font-size:11px;color:#9A9A94;border-top:1p
   <div id="kidList"></div>
 </div>
 
-<!-- ACUERDOS -->
+<!-- -- ACUERDOS ------------------------------------------ -->
 <div id="tab-agreements" class="hidden">
   <div class="section-header">
     <div class="section-title"><h2>Acuerdos</h2><p>Registro de acuerdos entre ambos padres</p></div>
-    <button class="btn-sm" id="toggleAgrBtn">+ Nuevo</button>
+    <button class="btn-sm" id="toggleAgrBtn"><i data-lucide="plus"></i> Nuevo</button>
   </div>
   <div id="agrForm" class="hidden form-box">
-    <p style="font-weight:700;font-size:14px;color:#6B7445;margin-bottom:12px">Nuevo acuerdo</p>
+    <p style="font-weight:700;font-size:15px;color:var(--primary);margin-bottom:14px">Nuevo acuerdo</p>
     <div style="display:grid;gap:10px">
       <input class="inp" id="agrTitle" placeholder="Título del acuerdo"/>
       <div class="grid-2">
         <select class="sel" id="agrCat"><option>Custodia</option><option>Económico</option><option>Salud</option><option>Educación</option><option>Vacaciones</option><option>Otro</option></select>
         <select class="sel" id="agrStatus"><option>Activo</option><option>En revisión</option><option>Completado</option></select>
       </div>
-      <textarea class="inp" id="agrContent" placeholder="Contenido del acuerdo..." style="min-height:80px;resize:vertical"></textarea>
+      <textarea class="inp" id="agrContent" placeholder="Contenido del acuerdo…" style="min-height:84px;resize:vertical"></textarea>
       <div style="display:flex;gap:8px">
         <button class="btn-sm" id="saveAgrBtn">Guardar</button>
         <button class="btn-outline" id="cancelAgrBtn">Cancelar</button>
@@ -394,14 +731,14 @@ footer{text-align:center;padding:14px;font-size:11px;color:#9A9A94;border-top:1p
   <div id="agrList"></div>
 </div>
 
-<!-- RECORDATORIOS -->
+<!-- -- RECORDATORIOS ------------------------------------- -->
 <div id="tab-reminders" class="hidden">
   <div class="section-header">
     <div class="section-title"><h2>Recordatorios</h2><p>No olvides ningún compromiso</p></div>
-    <button class="btn-sm" id="toggleRemBtn">+ Agregar</button>
+    <button class="btn-sm" id="toggleRemBtn"><i data-lucide="plus"></i> Agregar</button>
   </div>
   <div id="remForm" class="hidden form-box">
-    <p style="font-weight:700;font-size:14px;color:#6B7445;margin-bottom:12px">Nuevo recordatorio</p>
+    <p style="font-weight:700;font-size:15px;color:var(--primary);margin-bottom:14px">Nuevo recordatorio</p>
     <div style="display:grid;gap:10px">
       <input class="inp" id="remTitle" placeholder="Título"/>
       <div class="grid-2">
@@ -421,26 +758,28 @@ footer{text-align:center;padding:14px;font-size:11px;color:#9A9A94;border-top:1p
   <div id="remList"></div>
 </div>
 
-<!-- RECURSOS -->
+<!-- -- RECURSOS ------------------------------------------ -->
 <div id="tab-recursos" class="hidden">
-  <div class="section-header"><div class="section-title"><h2>Recursos de Apoyo</h2><p>Organismos clave para familias en Chile</p></div></div>
-  <div style="background:linear-gradient(135deg,#7A1A1A,#B02020);border-radius:13px;padding:16px 18px;margin-bottom:14px;display:flex;align-items:center;gap:14px;justify-content:space-between;flex-wrap:wrap">
+  <div class="section-header">
+    <div class="section-title"><h2>Recursos de Apoyo</h2><p>Organismos clave para familias en Chile</p></div>
+  </div>
+  <div class="emergency-card">
     <div>
       <div style="color:#fff;font-weight:800;font-size:15px">📞 Fono Familia — 149</div>
-      <div style="color:rgba(255,255,255,.75);font-size:12px">Atención gratuita 24/7 · Carabineros</div>
+      <div style="color:rgba(255,255,255,.75);font-size:12px;margin-top:3px">Atención gratuita 24/7 · Carabineros</div>
     </div>
-    <a href="tel:149" style="background:#fff;color:#B02020;border-radius:9px;padding:9px 18px;font-weight:800;font-size:13px;text-decoration:none">Llamar</a>
+    <a href="tel:149">Llamar</a>
   </div>
   <div id="resourcesList"></div>
 </div>
-
+```
 
   </main>
   <footer>CoPadres by Kindflo · Chile · 2025</footer>
 </div>
 
 <script>
-// ─── FIREBASE ───────────────────────────────────────────────
+// --- FIREBASE -----------------------------------------------
 firebase.initializeApp({
   apiKey: "AIzaSyCPNF2HQ2x23Pbo2rAqBCkcqddSm7-BJkk",
   authDomain: "kindflo-copadres.firebaseapp.com",
@@ -452,7 +791,7 @@ firebase.initializeApp({
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ─── ESTADO ─────────────────────────────────────────────────
+// --- ESTADO -------------------------------------------------
 let USER = null, USERDATA = null, CODATA = null, FAMILY_ID = null;
 let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
 let selDay = null, custodyMap = {}, calEventsMap = {};
@@ -460,7 +799,7 @@ let expenses = [], messages = [], children = [], agreements = [], reminders = []
 let expPeriod = 'week', expCurrency = 'CLP', UF = 38650;
 let expandedAgr = null;
 
-// ─── HELPERS ────────────────────────────────────────────────
+// --- HELPERS ------------------------------------------------
 const $ = id => document.getElementById(id);
 const show = id => $(id).classList.remove('hidden');
 const hide = id => $(id).classList.add('hidden');
@@ -492,7 +831,7 @@ const AUTH_ERRORS = {
 };
 const errMsg = code => AUTH_ERRORS[code] || 'Error inesperado. Intenta de nuevo.';
 
-// ─── AUTH FUNCIONES ──────────────────────────────────────────
+// --- AUTH FUNCIONES ------------------------------------------
 function switchToLogin() {
   show('loginForm'); hide('registerForm'); hide('forgotForm');
   $('tabLoginBtn').classList.add('active');
@@ -573,7 +912,7 @@ async function doReset() {
   }
 }
 
-// ─── CONNECT ────────────────────────────────────────────────
+// --- CONNECT ------------------------------------------------
 function showConnectScreen() {
   hide('authScreen'); hide('app'); show('connectScreen');
   if (USERDATA && USERDATA.inviteCode) {
@@ -611,18 +950,17 @@ async function autoConnect(code) {
   }
 }
 
-// ─── AUTH LISTENER ───────────────────────────────────────────
+// --- AUTH LISTENER -------------------------------------------
 auth.onAuthStateChanged(function(u) {
   USER = u;
   if (!u) {
     show('authScreen');
-document.getElementById('authScreen').style.display = 'flex';
-hide('connectScreen'); hide('app');
+    document.getElementById('authScreen').style.display = 'flex';
+    hide('connectScreen'); hide('app');
     return;
   }
   hide('authScreen');
-document.getElementById('app').style.display = 'block';
-  // Check invite code in URL
+  document.getElementById('app').style.display = 'block';
   var urlParams = new URLSearchParams(window.location.search);
   var inviteCode = urlParams.get('invite');
 
@@ -669,7 +1007,7 @@ function updateLabels() {
   }
 }
 
-// ─── LOAD APP ───────────────────────────────────────────────
+// --- LOAD APP -----------------------------------------------
 function loadApp() {
   hide('authScreen'); hide('connectScreen'); show('app');
   updateLabels();
@@ -717,8 +1055,10 @@ function setupListeners() {
   });
 }
 
-// ─── EVENT LISTENERS ────────────────────────────────────────
+// --- EVENT LISTENERS ----------------------------------------
 window.addEventListener('DOMContentLoaded', function() {
+  lucide.createIcons();
+
   // Auth
   $('tabLoginBtn').addEventListener('click', switchToLogin);
   $('tabRegisterBtn').addEventListener('click', switchToRegister);
@@ -788,7 +1128,7 @@ window.addEventListener('DOMContentLoaded', function() {
   $('cancelRemBtn').addEventListener('click', function() { hide('remForm'); });
 });
 
-// ─── TABS ───────────────────────────────────────────────────
+// --- TABS ---------------------------------------------------
 function switchTab(tab) {
   ['calendar', 'expenses', 'messages', 'children', 'agreements', 'reminders', 'recursos'].forEach(function(t) {
     $('tab-' + t).classList.toggle('hidden', t !== tab);
@@ -798,7 +1138,7 @@ function switchTab(tab) {
   });
 }
 
-// ─── UF ─────────────────────────────────────────────────────
+// --- UF -----------------------------------------------------
 function fetchUF() {
   fetch('https://mindicador.cl/api/uf')
     .then(function(r) { return r.json(); })
@@ -812,7 +1152,7 @@ function fetchUF() {
     .catch(function() { $('ufDisplay').textContent = fmtCLP(UF) + ' (referencial)'; });
 }
 
-// ─── CALENDARIO ─────────────────────────────────────────────
+// --- CALENDARIO ---------------------------------------------
 function calKey() { return calYear + '-' + String(calMonth + 1).padStart(2, '0'); }
 function getCustody(d) { return custodyMap[calKey()] && custodyMap[calKey()][d] ? custodyMap[calKey()][d] : (d % 7 < 3 ? 'mama' : d % 7 === 3 ? 'both' : 'papa'); }
 function getEvs(d) { return calEventsMap[calKey()] && calEventsMap[calKey()][d] ? calEventsMap[calKey()][d] : []; }
@@ -842,12 +1182,12 @@ function nextMonth() {
 }
 
 function renderCalendar() {
-  var months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  var months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   if (!$('calMonthTitle')) return;
   $('calMonthTitle').textContent = months[calMonth] + ' ' + calYear;
   var namesEl = $('calDayNames');
   namesEl.innerHTML = '';
-  ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].forEach(function(d) {
+  ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].forEach(function(d) {
     var el = document.createElement('div');
     el.className = 'cal-day-name';
     el.textContent = d;
@@ -865,8 +1205,8 @@ function renderCalendar() {
     btn.className = 'cal-day ' + c;
     if (calYear === now.getFullYear() && calMonth === now.getMonth() && d === now.getDate()) btn.classList.add('today');
     if (selDay === d) btn.classList.add('selected');
-    var dotColor = c === 'mama' ? '#B5472A' : c === 'papa' ? '#3D3D3D' : '#8A8A78';
-    btn.innerHTML = '<div>' + d + '</div><div style="width:5px;height:5px;border-radius:1px;background:' + dotColor + ';margin:2px auto 0"></div>';
+    var dotColor = c === 'mama' ? 'var(--accent)' : c === 'papa' ? 'var(--primary-d)' : '#8A8A78';
+    btn.innerHTML = '<div style="font-size:12px">' + d + '</div><div style="width:5px;height:5px;border-radius:2px;background:' + dotColor + ';margin:3px auto 0"></div>';
     (function(day) {
       btn.addEventListener('click', function() { selDay = day; renderCalendar(); renderDayDetail(); });
     })(d);
@@ -880,7 +1220,10 @@ function renderDayDetail() {
   show('dayDetail');
   $('detailDay').textContent = selDay;
   var evs = getEvs(selDay);
-  $('detailEvents').innerHTML = evs.map(function(e) { return '<div style="font-size:12px;color:#5A5A55;margin-bottom:3px">📌 ' + e + '</div>'; }).join('');
+  $('detailEvents').innerHTML = evs.map(function(e) {
+    return '<div style="font-size:12px;color:var(--text-s);margin-bottom:4px;display:flex;align-items:center;gap:6px"><span style="color:var(--primary)">◆</span>' + e + '</div>';
+  }).join('');
+  lucide.createIcons();
 }
 
 async function saveEvent() {
@@ -916,21 +1259,19 @@ function renderProposals() {
   el.innerHTML = '';
   pending.forEach(function(pr) {
     var div = document.createElement('div');
-    div.style.cssText = 'background:#EEF0E6;border:1px solid rgba(107,116,69,.2);border-radius:11px;padding:12px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap';
-    div.innerHTML = '<div><div style="font-weight:700;font-size:13px">Día ' + pr.fromDay + ' → Día ' + pr.toDay + '</div>' + (pr.reason ? '<div style="font-size:12px;color:#5A5A55">' + pr.reason + '</div>' : '') + '</div><div style="display:flex;gap:6px"><button class="btn-sm accept-btn">✓ Aceptar</button><button class="btn-outline reject-btn">✗ Rechazar</button></div>';
+    div.className = 'proposal-card';
+    div.innerHTML = '<div><div style="font-weight:700;font-size:13px;color:var(--text);margin-bottom:3px">Día ' + pr.fromDay + ' → Día ' + pr.toDay + '</div>' + (pr.reason ? '<div style="font-size:12px;color:var(--text-s)">' + pr.reason + '</div>' : '') + '</div><div style="display:flex;gap:8px"><button class="btn-sm accept-btn" style="background:var(--success)">Aceptar</button><button class="btn-outline reject-btn">Rechazar</button></div>';
     div.querySelector('.accept-btn').addEventListener('click', function() { famCol('proposals').doc(pr.id).update({ status: 'accepted' }); });
     div.querySelector('.reject-btn').addEventListener('click', function() { famCol('proposals').doc(pr.id).update({ status: 'rejected' }); });
     el.appendChild(div);
   });
 }
 
-// ─── GASTOS ─────────────────────────────────────────────────
+// --- GASTOS -------------------------------------------------
 function setCurrency(c) {
   expCurrency = c;
-  $('btnCLP').style.background = c === 'CLP' ? '#6B7445' : '#fff';
-  $('btnCLP').style.color = c === 'CLP' ? '#fff' : '#5A5A55';
-  $('btnUF').style.background = c === 'UF' ? '#6B7445' : '#fff';
-  $('btnUF').style.color = c === 'UF' ? '#fff' : '#5A5A55';
+  $('btnCLP').classList.toggle('cur-active', c === 'CLP');
+  $('btnUF').classList.toggle('cur-active', c === 'UF');
   if (c === 'UF') show('ufHint'); else hide('ufHint');
 }
 
@@ -968,39 +1309,55 @@ function renderExpenses() {
   var tot = mT + pT;
   var unp = vis.filter(function(e) { return !e.paid; }).reduce(function(s, e) { return s + toCLP(e); }, 0);
   var net = mT - (tot * 0.5);
-  $('expStats').innerHTML = '<div class="stat-card" style="border-top-color:#B5472A"><div class="stat-label">' + p1() + '</div><div class="stat-val">' + fmtCLP(mT) + '</div></div>' +
-    '<div class="stat-card" style="border-top-color:#3D3D3D"><div class="stat-label">' + p2() + '</div><div class="stat-val">' + fmtCLP(pT) + '</div></div>' +
-    '<div class="stat-card" style="border-top-color:#C4622D"><div class="stat-label">Total</div><div class="stat-val">' + fmtCLP(tot) + '</div></div>' +
-    '<div class="stat-card" style="border-top-color:' + (unp > 0 ? '#B94040' : '#6B7445') + '"><div class="stat-label">Sin pagar</div><div class="stat-val" style="color:' + (unp > 0 ? '#B94040' : '#6B7445') + '">' + fmtCLP(unp) + '</div></div>';
+  $('expStats').innerHTML =
+    '<div class="stat-card" style="border-top-color:var(--accent)"><div class="stat-label">' + p1() + '</div><div class="stat-val">' + fmtCLP(mT) + '</div></div>' +
+    '<div class="stat-card" style="border-top-color:var(--primary-d)"><div class="stat-label">' + p2() + '</div><div class="stat-val">' + fmtCLP(pT) + '</div></div>' +
+    '<div class="stat-card" style="border-top-color:var(--warn)"><div class="stat-label">Total</div><div class="stat-val">' + fmtCLP(tot) + '</div></div>' +
+    '<div class="stat-card" style="border-top-color:' + (unp > 0 ? 'var(--error)' : 'var(--success)') + '"><div class="stat-label">Sin pagar</div><div class="stat-val" style="color:' + (unp > 0 ? 'var(--error)' : 'var(--success)') + '">' + fmtCLP(unp) + '</div></div>';
   if (Math.abs(net) < 1) {
-    $('balanceBar').innerHTML = '✅ <span style="color:#6B7445;font-weight:600">Cuentas al día</span>';
+    $('balanceBar').innerHTML = '<span style="color:var(--success);font-weight:600">✓ Cuentas al día</span>';
   } else if (net > 0) {
-    $('balanceBar').innerHTML = p2() + ' debe <b style="color:#C4622D">' + fmtCLP(net) + '</b> a ' + p1();
+    $('balanceBar').innerHTML = p2() + ' debe <b style="color:var(--warn)">' + fmtCLP(net) + '</b> a ' + p1();
   } else {
-    $('balanceBar').innerHTML = p1() + ' debe <b style="color:#C4622D">' + fmtCLP(Math.abs(net)) + '</b> a ' + p2();
+    $('balanceBar').innerHTML = p1() + ' debe <b style="color:var(--warn)">' + fmtCLP(Math.abs(net)) + '</b> a ' + p2();
   }
   $('expCount').textContent = vis.length + ' registros';
   var el = $('expList');
-  if (!vis.length) { el.innerHTML = '<p style="padding:20px;text-align:center;color:#9A9A94;font-size:13px">Sin gastos en este período</p>'; return; }
+  if (!vis.length) { el.innerHTML = '<p class="empty-state">Sin gastos en este período</p>'; return; }
   el.innerHTML = '';
   vis.forEach(function(ex) {
     var row = document.createElement('div');
     row.className = 'exp-row';
-    row.innerHTML = '<div style="flex:1"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px"><span style="font-weight:600;font-size:13px">' + ex.description + '</span><button class="toggle-btn" style="border:none;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:700;background:' + (ex.paid ? '#EEF0E6' : '#FEE8E8') + ';color:' + (ex.paid ? '#6B7445' : '#B94040') + '">' + (ex.paid ? 'Pagado' : 'Pendiente') + '</button></div><div style="font-size:11px;color:#9A9A94">' + ex.date + ' · ' + ex.category + ' · ' + (ex.paidBy === 'mama' ? p1() : p2()) + '</div></div><div style="text-align:right;margin-left:10px;display:flex;align-items:center;gap:8px"><div><div style="font-weight:800;font-size:14px">' + (ex.currency === 'UF' ? fmtUF(ex.amount) : fmtCLP(ex.amount)) + '</div>' + (ex.currency === 'UF' ? '<div style="font-size:10px;color:#9A9A94">' + fmtCLP(ex.amount * UF) + '</div>' : '') + '</div><button class="del-btn" style="background:#EEEDE8;border:none;border-radius:7px;width:28px;height:28px">🗑</button></div>';
+    var isPaid = ex.paid;
+    row.innerHTML =
+      '<div style="flex:1">' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
+          '<span style="font-weight:600;font-size:13px;color:var(--text)">' + ex.description + '</span>' +
+          '<button class="toggle-btn" style="background:' + (isPaid ? 'rgba(122,155,118,.15)' : 'rgba(184,92,92,.12)') + ';color:' + (isPaid ? 'var(--success)' : 'var(--error)') + '">' + (isPaid ? 'Pagado' : 'Pendiente') + '</button>' +
+        '</div>' +
+        '<div style="font-size:11px;color:var(--text-s)">' + ex.date + ' · ' + ex.category + ' · ' + (ex.paidBy === 'mama' ? p1() : p2()) + '</div>' +
+      '</div>' +
+      '<div style="text-align:right;display:flex;align-items:center;gap:9px">' +
+        '<div>' +
+          '<div style="font-weight:700;font-size:14px;color:var(--text)">' + (ex.currency === 'UF' ? fmtUF(ex.amount) : fmtCLP(ex.amount)) + '</div>' +
+          (ex.currency === 'UF' ? '<div style="font-size:10px;color:var(--text-s)">' + fmtCLP(ex.amount * UF) + '</div>' : '') +
+        '</div>' +
+        '<button class="btn-danger del-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>' +
+      '</div>';
     row.querySelector('.toggle-btn').addEventListener('click', function() { famCol('expenses').doc(ex.id).update({ paid: !ex.paid }); });
     row.querySelector('.del-btn').addEventListener('click', function() { famCol('expenses').doc(ex.id).delete(); });
     el.appendChild(row);
   });
 }
 
-// ─── MENSAJES ───────────────────────────────────────────────
+// --- MENSAJES -----------------------------------------------
 function renderQuickReplies() {
   var el = $('quickReplies');
   if (!el) return;
   el.innerHTML = '';
   ['¿Puedes recoger a los niños mañana?', 'Tiene cita médica el viernes.', '¿Cambiamos el fin de semana?'].forEach(function(t) {
     var btn = document.createElement('button');
-    btn.style.cssText = 'background:#fff;border:1px solid #DDD;border-radius:20px;padding:5px 12px;font-size:11px;color:#5A5A55';
+    btn.className = 'quick-reply-btn';
     btn.textContent = t;
     btn.addEventListener('click', function() { $('msgInput').value = t; });
     el.appendChild(btn);
@@ -1022,7 +1379,7 @@ async function sendMsg() {
 function renderMessages() {
   var el = $('msgList');
   if (!el) return;
-  if (!messages.length) { el.innerHTML = '<p style="text-align:center;color:#9A9A94;font-size:13px;margin:auto">Sin mensajes aún</p>'; return; }
+  if (!messages.length) { el.innerHTML = '<p style="text-align:center;color:var(--text-s);font-size:13px;margin:auto">Sin mensajes aún</p>'; return; }
   el.innerHTML = messages.map(function(m) {
     var isMe = m.createdBy === (USER && USER.uid);
     var time = m.createdAt && m.createdAt.toDate ? m.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
@@ -1031,7 +1388,7 @@ function renderMessages() {
   el.scrollTop = el.scrollHeight;
 }
 
-// ─── HIJOS ──────────────────────────────────────────────────
+// --- HIJOS --------------------------------------------------
 function openKidForm(kid) {
   $('kidFormTitle').textContent = kid ? 'Editar hijo' : 'Agregar hijo';
   $('editKidId').value = kid ? kid.id : '';
@@ -1062,20 +1419,42 @@ async function saveKid() {
 function renderChildren() {
   var el = $('kidList');
   if (!el) return;
-  if (!children.length) { el.innerHTML = '<div style="text-align:center;padding:50px 20px;color:#9A9A94">Agrega el perfil de tus hijos</div>'; return; }
+  if (!children.length) { el.innerHTML = '<div class="empty-state">Agrega el perfil de tus hijos</div>'; return; }
   el.innerHTML = '';
   children.forEach(function(kid) {
     var initials = (kid.name || '?').split(' ').map(function(w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
     var card = document.createElement('div');
     card.className = 'card';
-    card.innerHTML = '<div class="card-body"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="display:flex;gap:12px;align-items:center"><div class="kid-avatar">' + initials + '</div><div><h3 style="margin:0;font-size:16px;font-weight:700">' + kid.name + '</h3><p style="margin:2px 0 0;color:#5A5A55;font-size:12px">' + (kid.age || '') + ' años</p></div></div><div style="display:flex;gap:6px"><button class="btn-outline edit-btn">✏ Editar</button><button style="background:#EEEDE8;border:none;border-radius:8px;width:32px;height:32px" class="del-btn">🗑</button></div></div><div class="info-grid"><div class="info-item"><div class="info-item-label">🏫 Escuela</div><div class="info-item-val">' + (kid.school || '—') + '</div></div><div class="info-item"><div class="info-item-label">🩺 Doctor/a</div><div class="info-item-val">' + (kid.doctor || '—') + '</div></div><div class="info-item"><div class="info-item-label">🩸 Sangre</div><div class="info-item-val">' + (kid.bloodType || '—') + '</div></div><div class="info-item"><div class="info-item-label">⚠ Alergias</div><div class="info-item-val">' + (kid.allergies || '—') + '</div></div></div>' + (kid.notes ? '<div style="background:#EEF0E6;border-radius:9px;padding:10px 13px;margin-top:10px;border-left:3px solid #6B7445"><div style="font-size:10px;color:#6B7445;font-weight:700;margin-bottom:2px">Notas</div><div style="font-size:12px;color:#111;line-height:1.5">' + kid.notes + '</div></div>' : '') + '</div>';
+    card.innerHTML =
+      '<div class="card-body">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
+          '<div style="display:flex;gap:14px;align-items:center">' +
+            '<div class="kid-avatar">' + initials + '</div>' +
+            '<div>' +
+              '<h3 style="margin:0;font-size:16px;font-weight:700;color:var(--text)">' + kid.name + '</h3>' +
+              '<p style="margin:3px 0 0;color:var(--text-s);font-size:12px">' + (kid.age || '') + ' años</p>' +
+            '</div>' +
+          '</div>' +
+          '<div style="display:flex;gap:7px">' +
+            '<button class="btn-outline edit-btn" style="padding:7px 12px"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>' +
+            '<button class="btn-danger del-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="info-grid">' +
+          '<div class="info-item"><div class="info-item-label">Escuela</div><div class="info-item-val">' + (kid.school || '—') + '</div></div>' +
+          '<div class="info-item"><div class="info-item-label">Doctor/a</div><div class="info-item-val">' + (kid.doctor || '—') + '</div></div>' +
+          '<div class="info-item"><div class="info-item-label">Sangre</div><div class="info-item-val">' + (kid.bloodType || '—') + '</div></div>' +
+          '<div class="info-item"><div class="info-item-label">Alergias</div><div class="info-item-val">' + (kid.allergies || '—') + '</div></div>' +
+        '</div>' +
+        (kid.notes ? '<div class="notes-box"><div style="font-size:10px;color:var(--primary);font-weight:700;margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px">Notas</div><div style="font-size:12px;color:var(--text);line-height:1.55">' + kid.notes + '</div></div>' : '') +
+      '</div>';
     card.querySelector('.edit-btn').addEventListener('click', function() { openKidForm(kid); });
     card.querySelector('.del-btn').addEventListener('click', function() { famCol('children').doc(kid.id).delete(); });
     el.appendChild(card);
   });
 }
 
-// ─── ACUERDOS ───────────────────────────────────────────────
+// --- ACUERDOS -----------------------------------------------
 async function saveAgr() {
   var title = $('agrTitle').value.trim(), content = $('agrContent').value.trim();
   if (!title || !content) return;
@@ -1092,22 +1471,37 @@ async function saveAgr() {
 function renderAgreements() {
   var el = $('agrList');
   if (!el) return;
-  if (!agreements.length) { el.innerHTML = '<div style="text-align:center;padding:50px 20px;color:#9A9A94">Sin acuerdos registrados</div>'; return; }
+  if (!agreements.length) { el.innerHTML = '<div class="empty-state">Sin acuerdos registrados</div>'; return; }
   el.innerHTML = '';
-  var sColor = { 'Activo': '#6B7445', 'En revisión': '#B07D3A', 'Completado': '#9A9A94' };
+  var sColor = { 'Activo': 'var(--success)', 'En revisión': 'var(--warn)', 'Completado': 'var(--text-s)' };
   agreements.forEach(function(agr) {
     var isExp = expandedAgr === agr.id;
+    var sc = sColor[agr.status] || 'var(--text-s)';
     var card = document.createElement('div');
     card.className = 'card';
     card.style.marginBottom = '10px';
-    card.innerHTML = '<div style="padding:13px 15px"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"><span class="badge" style="background:' + (sColor[agr.status] || '#9A9A94') + '22;color:' + (sColor[agr.status] || '#9A9A94') + '">' + agr.status + '</span><span class="badge" style="background:#EEEDE8;color:#5A5A55">' + agr.category + '</span></div><h3 style="margin:0;font-size:14px;font-weight:700">' + agr.title + '</h3></div><div style="display:flex;gap:6px;align-items:center"><span class="toggle-agr" style="cursor:pointer">' + (isExp ? '▲' : '▼') + '</span><button class="del-btn" style="background:#EEEDE8;border:none;border-radius:7px;width:28px;height:28px">🗑</button></div></div>' + (isExp ? '<div style="margin-top:10px;background:#EEEDE8;border-radius:9px;padding:12px;font-size:13px;color:#5A5A55;line-height:1.65">' + agr.content + '</div>' : '') + '</div>';
+    card.innerHTML =
+      '<div class="agr-header">' +
+        '<div>' +
+          '<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:7px">' +
+            '<span class="badge" style="background:' + sc.replace(')', '').replace('var(', '') + '22' + ';color:' + sc + ';border:1px solid ' + sc + '44">' + agr.status + '</span>' +
+            '<span class="badge" style="background:var(--bg);color:var(--text-s);border:1px solid var(--border)">' + agr.category + '</span>' +
+          '</div>' +
+          '<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--text)">' + agr.title + '</h3>' +
+        '</div>' +
+        '<div style="display:flex;gap:7px;align-items:center">' +
+          '<span class="toggle-agr" style="cursor:pointer;color:var(--text-s);font-size:12px">' + (isExp ? '▲' : '▼') + '</span>' +
+          '<button class="btn-danger del-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>' +
+        '</div>' +
+      '</div>' +
+      (isExp ? '<div class="agr-body"><div class="agr-content">' + agr.content + '</div></div>' : '');
     card.querySelector('.toggle-agr').addEventListener('click', function() { expandedAgr = isExp ? null : agr.id; renderAgreements(); });
     card.querySelector('.del-btn').addEventListener('click', function() { famCol('agreements').doc(agr.id).delete(); });
     el.appendChild(card);
   });
 }
 
-// ─── RECORDATORIOS ──────────────────────────────────────────
+// --- RECORDATORIOS ------------------------------------------
 async function saveRem() {
   var title = $('remTitle').value.trim(), date = $('remDate').value;
   if (!title || !date) return;
@@ -1120,28 +1514,41 @@ async function saveRem() {
 }
 
 function fLbl(f) { return f === 'both' ? 'Ambos' : f === 'mama' ? p1() : p2(); }
-function fColor(f) { return f === 'both' ? '#8A8A78' : f === 'mama' ? '#B5472A' : '#3D3D3D'; }
+function fColor(f) { return f === 'both' ? '#8A8A78' : f === 'mama' ? 'var(--accent)' : 'var(--primary-d)'; }
 
 function renderReminders() {
   var el = $('remList');
   if (!el) return;
   var up = reminders.filter(function(r) { return !r.done; }).sort(function(a, b) { return new Date(a.date) - new Date(b.date); });
   var done = reminders.filter(function(r) { return r.done; });
-  if (!reminders.length) { el.innerHTML = '<div style="text-align:center;padding:50px 20px;color:#9A9A94">Sin recordatorios</div>'; return; }
+  if (!reminders.length) { el.innerHTML = '<div class="empty-state">Sin recordatorios</div>'; return; }
   el.innerHTML = '';
   if (up.length) {
     var hdr = document.createElement('p');
-    hdr.style.cssText = 'margin:0 0 8px;font-size:10px;font-weight:700;color:#9A9A94;text-transform:uppercase;letter-spacing:1px';
-    hdr.textContent = '🔔 Próximos';
+    hdr.className = 'section-lbl';
+    hdr.textContent = 'Próximos';
     el.appendChild(hdr);
     var card = document.createElement('div');
     card.className = 'card';
     up.forEach(function(r) {
       var d = new Date(r.date);
       var near = (d - new Date()) < 86400000 * 3;
+      var fc = fColor(r.for);
       var row = document.createElement('div');
       row.className = 'rem-row';
-      row.innerHTML = '<div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">' + (near ? '<span class="badge" style="background:#C4622D22;color:#C4622D">Pronto</span>' : '') + '<span class="badge" style="background:' + fColor(r.for) + '22;color:' + fColor(r.for) + '">' + fLbl(r.for) + '</span></div><div class="rem-title">' + r.title + '</div><div class="rem-meta">📅 ' + d.toLocaleDateString('es-CL', { weekday: 'short', month: 'short', day: 'numeric' }) + ' · ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '</div></div><div style="display:flex;gap:6px"><button class="done-btn" style="background:#EEF0E6;border:none;border-radius:8px;width:32px;height:32px">✓</button><button class="del-btn" style="background:#EEEDE8;border:none;border-radius:8px;width:32px;height:32px">🗑</button></div>';
+      row.innerHTML =
+        '<div style="flex:1">' +
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:5px">' +
+            (near ? '<span class="badge" style="background:rgba(216,164,95,.15);color:var(--warn);border:1px solid rgba(216,164,95,.3)">Pronto</span>' : '') +
+            '<span class="badge" style="background:rgba(0,0,0,.05);color:' + fc + '">' + fLbl(r.for) + '</span>' +
+          '</div>' +
+          '<div class="rem-title">' + r.title + '</div>' +
+          '<div class="rem-meta">' + d.toLocaleDateString('es-CL', { weekday: 'short', month: 'short', day: 'numeric' }) + ' · ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:7px">' +
+          '<button class="btn-done done-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>' +
+          '<button class="btn-danger del-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>' +
+        '</div>';
       row.querySelector('.done-btn').addEventListener('click', function() { famCol('reminders').doc(r.id).update({ done: true }); });
       row.querySelector('.del-btn').addEventListener('click', function() { famCol('reminders').doc(r.id).delete(); });
       card.appendChild(row);
@@ -1150,20 +1557,21 @@ function renderReminders() {
   }
   if (done.length) {
     var hdr2 = document.createElement('p');
-    hdr2.style.cssText = 'margin:14px 0 8px;font-size:10px;font-weight:700;color:#9A9A94;text-transform:uppercase;letter-spacing:1px';
-    hdr2.textContent = '✓ Completados';
+    hdr2.className = 'section-lbl';
+    hdr2.style.marginTop = '16px';
+    hdr2.textContent = 'Completados';
     el.appendChild(hdr2);
     done.forEach(function(r) {
       var row = document.createElement('div');
-      row.style.cssText = 'background:#fff;border-radius:11px;padding:11px 15px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;opacity:.45;border:1px solid #E8E8E3';
-      row.innerHTML = '<div><div style="font-weight:600;font-size:12px;text-decoration:line-through;color:#5A5A55">' + r.title + '</div></div><button class="undone-btn" style="background:#EEEDE8;border:none;border-radius:8px;width:28px;height:28px">↩</button>';
+      row.style.cssText = 'background:var(--surface);border-radius:11px;padding:11px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;opacity:.45;border:1px solid var(--border)';
+      row.innerHTML = '<div style="font-weight:600;font-size:12px;text-decoration:line-through;color:var(--text-s)">' + r.title + '</div><button class="btn-undo undone-btn"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13C5.5 7 12 5 17 8s6.5 9.5 2 14"/></svg></button>';
       row.querySelector('.undone-btn').addEventListener('click', function() { famCol('reminders').doc(r.id).update({ done: false }); });
       el.appendChild(row);
     });
   }
 }
 
-// ─── RECURSOS ───────────────────────────────────────────────
+// --- RECURSOS -----------------------------------------------
 function renderResources() {
   var el = $('resourcesList');
   if (!el) return;
@@ -1177,7 +1585,16 @@ function renderResources() {
   resources.forEach(function(r) {
     var card = document.createElement('div');
     card.className = 'resource-card';
-    card.innerHTML = '<div class="resource-icon" style="background:#6B744411">' + r.icon + '</div><div style="flex:1"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:4px"><div><div class="resource-title">' + r.title + '</div><div class="resource-sub">' + r.sub + '</div></div><span class="badge" style="background:#EEF0E6;color:#6B7445">' + r.tag + '</span></div><div class="resource-desc">' + r.desc + '</div><a href="' + r.link + '" target="_blank" class="resource-link">Acceder</a></div>';
+    card.innerHTML =
+      '<div class="resource-icon" style="background:rgba(95,124,110,.1)">' + r.icon + '</div>' +
+      '<div style="flex:1">' +
+        '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:5px">' +
+          '<div><div class="resource-title">' + r.title + '</div><div class="resource-sub">' + r.sub + '</div></div>' +
+          '<span class="badge" style="background:rgba(95,124,110,.1);color:var(--primary);border:1px solid rgba(95,124,110,.2);height:fit-content">' + r.tag + '</span>' +
+        '</div>' +
+        '<div class="resource-desc">' + r.desc + '</div>' +
+        '<a href="' + r.link + '" target="_blank" class="resource-link">Acceder</a>' +
+      '</div>';
     el.appendChild(card);
   });
 }
