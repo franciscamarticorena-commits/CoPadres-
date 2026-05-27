@@ -1,0 +1,2346 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CoPadres by Kindflo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700;800;900&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+/* --- TOKENS ----------------------------------------------- */
+:root {
+  --bg:        #F8F6F1;
+  --surface:   #FFFFFF;
+  --primary:   #5F7C6E;
+  --primary-d: #365449;
+  --accent:    #D8895C;
+  --beige:     #E7DDCF;
+  --text:      #26332D;
+  --text-s:    #6D766F;
+  --border:    #E6E1D8;
+  --success:   #7A9B76;
+  --warn:      #D8A45F;
+  --error:     #B85C5C;
+  --r-card:    18px;
+  --r-btn:     12px;
+  --r-inp:     11px;
+  --shadow:    0 2px 16px rgba(38,51,45,.06);
+  --shadow-md: 0 6px 28px rgba(38,51,45,.1);
+  --font:      'Nunito Sans', 'DM Sans', sans-serif;
+  --font-d:    'Nunito Sans', 'DM Sans', sans-serif;
+}
+
+/* - RESET ---------------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+button { cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+input, select, textarea { font-family: inherit; }
+.hidden { display: none !important; }
+
+/* - AUTH SCREEN --------------- */
+#authScreen {
+display: flex; 
+align-items: center; 
+justify-content: center;
+min-height: 100vh; 
+padding: 40px 20px;
+background: var(--bg);
+}
+.authBox {
+width: 100%;
+max-width: 420px;
+margin: 0 auto;
+background: var(--surface); 
+border-radius: 24px;
+padding: 40px;
+box-shadow: 0 8px 30px rgba(38,51,45,.08);
+border: 1px solid var(--border);
+}
+.logo { text-align: center; margin-bottom: 28px; }
+.logo-mark {
+width: 60px; height: 60px; background: var(--primary);
+border-radius: 18px; display: flex; align-items: center; justify-content: center;
+margin: 0 auto 14px; box-shadow: 0 4px 16px rgba(95,124,110,.3);
+}
+.logo-mark svg { color: #fff; width: 28px; height: 28px; }
+.logo h1 { font-family: var(--font); font-size: 32px; font-weight: 800; color: var(--primary-d); letter-spacing: -.6px; }
+.logo p { font-size: 11px; color: var(--text-s); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 3px; }
+
+/* Auth tabs */
+.tabs {
+display: flex; background: var(--bg); border-radius: 10px;
+padding: 3px; margin-bottom: 22px; border: 1px solid var(--border);
+}
+.tabs button {
+flex: 1; padding: 9px; border: none; border-radius: 8px;
+font-weight: 600; font-size: 13px; background: transparent; color: var(--text-s);
+transition: all .18s;
+}
+.tabs button.active { background: var(--surface); color: var(--primary); box-shadow: 0 1px 6px rgba(38,51,45,.1); }
+
+/* Form fields */
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 11px; font-weight: 600; color: var(--text-s); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .4px; }
+.field input, .field select {
+width: 100%; padding: 11px 14px; border-radius: var(--r-inp);
+border: 1.5px solid var(--border); font-size: 14px; color: var(--text);
+outline: none; background: var(--bg); transition: border-color .18s;
+}
+.field input:focus, .field select:focus { border-color: var(--primary); background: var(--surface); }
+
+.btn-primary {
+width: 100%; background: var(--primary); color: #fff; border: none;
+border-radius: var(--r-btn); padding: 13px; font-weight: 700; font-size: 14px;
+margin-top: 4px; transition: background .18s, transform .1s, box-shadow .18s;
+box-shadow: 0 2px 12px rgba(95,124,110,.28);
+}
+.btn-primary:hover { background: var(--primary-d); box-shadow: 0 4px 18px rgba(95,124,110,.35); }
+.btn-primary:active { transform: scale(.98); }
+
+.btn-secondary {
+background: transparent; color: var(--text-s); border: 1.5px solid var(--border);
+border-radius: var(--r-btn); padding: 9px 16px; font-weight: 600; font-size: 13px;
+transition: all .18s;
+}
+.btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+.link-btn { background: none; border: none; color: var(--primary); font-size: 12px; font-weight: 600; font-family: inherit; }
+.link-btn:hover { text-decoration: underline; }
+
+.msg-error { background: #FBF0F0; color: var(--error); border-radius: 9px; padding: 10px 14px; font-size: 12px; margin-bottom: 12px; border: 1px solid #E8C8C8; }
+.msg-ok { background: #EEF5ED; color: var(--success); border-radius: 9px; padding: 10px 14px; font-size: 12px; margin-bottom: 12px; border: 1px solid #C8DECB; }
+
+/* - CONNECT SCREEN -------------------- */
+#connectScreen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+.connectBox { background: var(--surface); border-radius: var(--r-card); padding: 36px 32px; width: 100%; max-width: 420px; box-shadow: var(--shadow-md); border: 1px solid var(--border); }
+.invite-box { background: var(--bg); border-radius: 13px; border: 1px solid var(--border); padding: 18px; margin-bottom: 18px; }
+.invite-link-display { background: var(--surface); border-radius: 9px; padding: 11px 14px; font-size: 12px; color: var(--text-s); word-break: break-all; border: 1px solid var(--border); margin-bottom: 12px; }
+.btn-whatsapp { width: 100%; background: #25D366; color: #fff; border: none; border-radius: var(--r-btn); padding: 13px; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background .18s; }
+.btn-whatsapp:hover { background: #1EBE57; }
+
+/* - APP HEADER ---------------------- */
+#app { display: none; }
+header {
+background: var(--surface); border-bottom: 1px solid var(--border);
+position: sticky; top: 0; z-index: 100;
+box-shadow: 0 1px 12px rgba(38,51,45,.06);
+}
+.header-inner { max-width: 880px; margin: 0 auto; padding: 0 16px; }
+.header-top { display: flex; justify-content: space-between; align-items: center; height: 60px; }
+.header-brand { display: flex; align-items: center; gap: 10px; }
+.header-logo { width: 34px; height: 34px; background: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.header-logo svg { width: 18px; height: 18px; color: #fff; }
+.header-title { font-family: var(--font); font-size: 22px; font-weight: 800; color: var(--primary-d); letter-spacing: -.4px; line-height: 1; }
+.header-sub-text { font-size: 10px; color: var(--text-s); letter-spacing: .3px; margin-top: 1px; }
+.header-actions { display: flex; gap: 6px; }
+.icon-btn {
+background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px;
+width: 36px; height: 36px; color: var(--text-s); display: flex; align-items: center;
+justify-content: center; transition: all .18s;
+}
+.icon-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--surface); }
+.icon-btn svg { width: 16px; height: 16px; }
+
+/* - NAVIGATION ---------------------- */
+nav {
+display: flex; gap: 2px; padding: 0 4px;
+overflow-x: auto; scrollbar-width: none;
+border-top: 1px solid var(--border);
+}
+nav::-webkit-scrollbar { display: none; }
+nav button {
+flex: 0 0 auto; padding: 10px 14px; border: none; border-radius: 0;
+font-size: 12px; font-weight: 500; background: transparent;
+color: var(--text-s); display: flex; align-items: center; gap: 6px;
+border-bottom: 2px solid transparent; transition: all .18s; white-space: nowrap;
+}
+nav button svg { width: 15px; height: 15px; flex-shrink: 0; }
+nav button.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 700; }
+nav button:hover:not(.active) { color: var(--text); background: var(--bg); }
+
+/* - MAIN ------------------------- */
+main { max-width: 880px; margin: 0 auto; padding: 24px 16px 80px; }
+
+/* - CARDS ----------------- */
+.card { background: var(--surface); border-radius: var(--r-card); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; margin-bottom: 14px; }
+.card-body { padding: 20px; }
+
+/* - SECTION HEADER -------------------- */
+.section-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; }
+.section-title h2 { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -.3px; }
+.section-title p { font-size: 13px; color: var(--text-s); margin-top: 3px; }
+
+/* - BADGES ---------------- */
+.badge { display: inline-block; border-radius: 6px; padding: 2px 9px; font-size: 11px; font-weight: 600; }
+
+/* - BUTTONS ---------------- */
+.btn-sm {
+background: var(--primary); color: #fff; border: none;
+border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 600;
+display: inline-flex; align-items: center; gap: 7px; transition: background .18s, transform .1s;
+font-family: inherit;
+}
+.btn-sm:hover { background: var(--primary-d); }
+.btn-sm:active { transform: scale(.97); }
+.btn-sm svg { width: 14px; height: 14px; }
+
+.btn-outline {
+background: transparent; color: var(--text-s); border: 1.5px solid var(--border);
+border-radius: 10px; padding: 8px 14px; font-size: 13px; font-weight: 500;
+display: inline-flex; align-items: center; gap: 6px; transition: all .18s;
+font-family: inherit;
+}
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+.btn-outline svg { width: 14px; height: 14px; }
+
+.btn-ghost {
+background: var(--bg); color: var(--text-s); border: 1px solid var(--border);
+border-radius: 9px; padding: 7px 12px; font-size: 12px; font-weight: 500;
+display: inline-flex; align-items: center; gap: 5px; transition: all .18s;
+font-family: inherit;
+}
+.btn-ghost:hover { background: var(--beige); color: var(--text); }
+.btn-ghost svg { width: 13px; height: 13px; }
+
+.btn-danger {
+background: #FBF0F0; color: var(--error); border: none;
+border-radius: 9px; width: 32px; height: 32px; display: flex;
+align-items: center; justify-content: center; transition: background .18s; flex-shrink: 0;
+}
+.btn-danger:hover { background: #F5D8D8; }
+.btn-danger svg { width: 14px; height: 14px; }
+
+/* - INPUTS ---------------- */
+.inp {
+padding: 11px 14px; border-radius: var(--r-inp); border: 1.5px solid var(--border);
+font-size: 13px; width: 100%; outline: none; background: var(--bg);
+color: var(--text); transition: border-color .18s; font-family: inherit;
+}
+.inp:focus { border-color: var(--primary); background: var(--surface); }
+.sel {
+padding: 11px 14px; border-radius: var(--r-inp); border: 1.5px solid var(--border);
+font-size: 13px; background: var(--bg); color: var(--text); outline: none;
+font-family: inherit; transition: border-color .18s; cursor: pointer;
+}
+.sel:focus { border-color: var(--primary); background: var(--surface); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-box { background: var(--bg); border-radius: 14px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); }
+.lbl { font-size: 11px; font-weight: 600; color: var(--text-s); display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .4px; }
+
+/* - CALENDAR ----------------------- */
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+.cal-day-name { text-align: center; font-size: 10px; font-weight: 600; color: var(--text-s); padding: 4px 0; letter-spacing: .3px; }
+.cal-day {
+border-radius: 10px; padding: 6px 2px; min-height: 40px;
+text-align: center; font-size: 12px; border: 1.5px solid var(--border);
+background: var(--bg); position: relative; cursor: pointer;
+transition: all .15s; color: var(--text);
+}
+.cal-day:hover { border-color: var(--primary); background: var(--surface); }
+.cal-day.today { border-color: var(--accent); font-weight: 700; color: var(--accent); }
+.cal-day.selected { border-color: var(--primary); background: rgba(95,124,110,.08); box-shadow: 0 0 0 3px rgba(95,124,110,.12); }
+.cal-day.mama { background: rgba(216,137,92,.1); border-color: rgba(216,137,92,.25); }
+.cal-day.papa { background: rgba(54,84,73,.08); border-color: rgba(54,84,73,.2); }
+.cal-day.both { background: rgba(120,130,120,.1); border-color: rgba(120,130,120,.25); }
+
+.custody-legend { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; background: var(--surface); border-radius: 8px; padding: 6px 12px; border: 1px solid var(--border); color: var(--text-s); }
+.dot { width: 8px; height: 8px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
+
+/* - DAY DETAIL ---------------------- */
+.day-detail {
+margin-top: 16px; background: var(--bg); border-radius: 13px;
+padding: 16px; border: 1px solid var(--border);
+}
+.day-detail-title { font-weight: 700; font-size: 13px; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.day-detail-title svg { width: 15px; height: 15px; }
+
+/* - STATS ----------------- */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.stat-card { background: var(--surface); border-radius: 13px; padding: 14px 16px; border: 1px solid var(--border); border-top: 3px solid; }
+.stat-label { font-size: 10px; color: var(--text-s); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; }
+.stat-val { font-size: 17px; font-weight: 700; color: var(--text); }
+
+/* - PERIOD FILTER -------------- */
+.period-filter { display: flex; border-radius: 10px; border: 1.5px solid var(--border); overflow: hidden; margin-bottom: 16px; background: var(--surface); }
+.period-filter button { flex: 1; padding: 9px 4px; border: none; font-size: 12px; background: transparent; color: var(--text-s); font-family: inherit; font-weight: 500; transition: all .15s; }
+.period-filter button.active { background: var(--primary); color: #fff; font-weight: 700; }
+
+/* - BALANCE BAR --------------- */
+.balance-bar { background: var(--bg); border-radius: 11px; padding: 13px 16px; margin-bottom: 16px; border: 1px solid var(--border); font-size: 13px; color: var(--text-s); }
+
+/* - EXPENSE ROWS -------------- */
+.exp-row { display: flex; justify-content: space-between; align-items: center; padding: 13px 18px; border-bottom: 1px solid var(--border); gap: 10px; }
+.exp-row:last-child { border-bottom: none; }
+
+/* - UF BANNER --------------- */
+.uf-banner { background: var(--bg); border-radius: 11px; padding: 13px 16px; margin-bottom: 16px; border: 1px solid var(--border); }
+.uf-label { font-size: 10px; color: var(--text-s); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 4px; }
+.uf-val { font-size: 16px; font-weight: 700; color: var(--text); }
+
+/* - CURRENCY TOGGLE ------------- */
+.currency-toggle { display: flex; border-radius: 10px; border: 1.5px solid var(--border); overflow: hidden; background: var(--surface); }
+.currency-toggle button { flex: 1; padding: 10px; border: none; font-size: 12px; font-weight: 700; background: transparent; color: var(--text-s); font-family: inherit; transition: all .15s; }
+.currency-toggle button.cur-active { background: var(--primary); color: #fff; }
+
+/* - MESSAGES ----------------------- */
+.msg-list { padding: 16px; min-height: 220px; max-height: 360px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.msg-bubble { max-width: 78%; padding: 10px 14px; font-size: 13px; line-height: 1.5; }
+.msg-bubble.me { background: var(--primary); color: #fff; border-radius: 16px 16px 4px 16px; align-self: flex-end; }
+.msg-bubble.other { background: var(--bg); color: var(--text); border-radius: 16px 16px 16px 4px; align-self: flex-start; border: 1px solid var(--border); }
+.msg-sender { font-size: 10px; font-weight: 700; margin-bottom: 3px; opacity: .6; text-transform: uppercase; letter-spacing: .3px; }
+.msg-time { font-size: 10px; margin-top: 4px; opacity: .5; text-align: right; }
+.msg-input-row { display: flex; gap: 10px; align-items: center; }
+.msg-input-row .inp { flex: 1; border-radius: 24px; }
+.btn-send { background: var(--primary); color: #fff; border: none; border-radius: 24px; padding: 11px 20px; font-size: 13px; font-weight: 600; font-family: inherit; display: flex; align-items: center; gap: 6px; transition: background .18s; flex-shrink: 0; }
+.btn-send:hover { background: var(--primary-d); }
+.btn-send svg { width: 14px; height: 14px; }
+
+/* - QUICK REPLIES -------------- */
+.quick-replies { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.quick-reply-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 11px; color: var(--text-s); font-family: inherit; transition: all .15s; }
+.quick-reply-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+/* - CHILDREN ----------------------- */
+.kid-avatar { width: 52px; height: 52px; background: var(--primary); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; color: #fff; flex-shrink: 0; font-family: var(--font-d); }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.info-item { background: var(--bg); border-radius: 10px; padding: 10px 13px; border: 1px solid var(--border); }
+.info-item-label { font-size: 10px; color: var(--text-s); font-weight: 600; text-transform: uppercase; letter-spacing: .3px; margin-bottom: 3px; }
+.info-item-val { font-size: 12px; font-weight: 600; color: var(--text); }
+
+/* - AGREEMENTS ---------------------- */
+.agr-header { padding: 15px 18px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; cursor: pointer; }
+.agr-body { padding: 0 18px 16px; background: var(--bg); border-top: 1px solid var(--border); }
+.agr-content { font-size: 13px; color: var(--text-s); line-height: 1.65; padding: 14px; }
+
+/* - REMINDERS --------------- */
+.rem-row { display: flex; justify-content: space-between; align-items: center; padding: 13px 18px; border-bottom: 1px solid var(--border); gap: 12px; }
+.rem-row:last-child { border-bottom: none; }
+.rem-title { font-weight: 600; font-size: 13px; color: var(--text); margin-bottom: 3px; }
+.rem-meta { font-size: 11px; color: var(--text-s); }
+.btn-done { background: var(--bg); border: 1.5px solid var(--border); border-radius: 9px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; transition: all .15s; flex-shrink: 0; color: var(--success); }
+.btn-done:hover { background: #EEF5ED; border-color: var(--success); }
+.btn-done svg { width: 14px; height: 14px; }
+.btn-undo { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: var(--text-s); transition: all .15s; }
+.btn-undo svg { width: 13px; height: 13px; }
+
+/* - RESOURCES --------------- */
+.resource-card { background: var(--surface); border-radius: 14px; padding: 18px; border: 1px solid var(--border); margin-bottom: 12px; display: flex; gap: 16px; box-shadow: var(--shadow); }
+.resource-icon { width: 48px; height: 48px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.resource-title { font-weight: 700; font-size: 14px; margin-bottom: 2px; color: var(--text); }
+.resource-sub { font-size: 11px; color: var(--text-s); margin-bottom: 7px; }
+.resource-desc { font-size: 12px; color: var(--text-s); line-height: 1.6; margin-bottom: 11px; }
+.resource-link { background: var(--primary); color: #fff; border-radius: 9px; padding: 7px 16px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-block; transition: background .18s; }
+.resource-link:hover { background: var(--primary-d); }
+
+/* Emergency call card */
+.emergency-card {
+background: rgba(255,255,255,.92);
+border: 1px solid rgba(111,123,75,.14);
+border-left: 5px solid var(--primary);
+color: var(--text);
+border-radius: var(--r-card); padding: 18px 20px; margin-bottom: 16px;
+display: flex; align-items: center; gap: 16px; justify-content: space-between; flex-wrap: wrap;
+box-shadow: var(--shadow);
+}
+.emergency-card a { background: var(--primary); color: #fff; border-radius: 10px; padding: 9px 20px; font-weight: 800; font-size: 13px; text-decoration: none; box-shadow: 0 8px 20px rgba(111,123,75,.18); }
+
+/* - SECTION LABELS -------------------- */
+.section-lbl { margin: 0 0 9px; font-size: 10px; font-weight: 700; color: var(--text-s); text-transform: uppercase; letter-spacing: 1px; }
+
+/* - PROPOSAL ----------------------- */
+.proposal-card { background: var(--bg); border: 1px solid rgba(95,124,110,.2); border-radius: 13px; padding: 14px 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+/* - TOGGLE STATUS -------------- */
+.toggle-btn { border: none; border-radius: 6px; padding: 3px 9px; font-size: 10px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all .15s; }
+
+/* - FOOTER ---------------- */
+footer { text-align: center; padding: 16px; font-size: 11px; color: var(--text-s); border-top: 1px solid var(--border); }
+
+/* - NOTES BOX --------------- */
+.notes-box { background: rgba(95,124,110,.07); border-radius: 10px; padding: 12px 14px; margin-top: 12px; border-left: 3px solid var(--primary); }
+
+/* - EMPTY STATE --------------- */
+.empty-state { text-align: center; padding: 52px 20px; color: var(--text-s); font-size: 13px; }
+
+/* - INFO TIP ----------------------- */
+.info-tip { background: rgba(95,124,110,.08); border-radius: 10px; padding: 11px 14px; margin-bottom: 14px; font-size: 12px; color: var(--primary-d); border: 1px solid rgba(95,124,110,.18); display: flex; align-items: center; gap: 8px; }
+.info-tip svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+
+/* ==========================================================
+   COPADRES BY KINDFLO - BRAND / UX FINAL OVERRIDE
+   Look & feel premium, cálido, minimalista.
+========================================================== */
+:root {
+  --bg: #F5F0E8;
+  --surface: #FFFFFF;
+  --surface-soft: #FBF8F2;
+  --primary: #66734F;
+  --primary-d: #465238;
+  --accent: #D06B43;
+  --accent-soft: #E7C7B8;
+  --beige: #E7DDCF;
+  --text: #2F312D;
+  --text-s: #777568;
+  --border: #E8E0D4;
+  --success: #66734F;
+  --warn: #C98E4D;
+  --error: #B85C5C;
+  --r-card: 24px;
+  --r-btn: 16px;
+  --r-inp: 14px;
+  --shadow: 0 10px 34px rgba(47,49,45,.07);
+  --shadow-md: 0 18px 50px rgba(47,49,45,.12);
+  --font: 'Nunito Sans', 'DM Sans', sans-serif;
+  --font-d: 'Nunito Sans', 'DM Sans', sans-serif;
+}
+
+html, body { background: var(--bg); color: var(--text); }
+body {
+  background:
+    radial-gradient(circle at 16% 12%, rgba(208,107,67,.13), transparent 30%),
+    radial-gradient(circle at 88% 18%, rgba(102,115,79,.12), transparent 34%),
+    linear-gradient(180deg, #FBF8F2 0%, #F5F0E8 100%);
+}
+
+/* Login */
+#authScreen {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(208,107,67,.12), transparent 28%),
+    radial-gradient(circle at 82% 10%, rgba(102,115,79,.12), transparent 32%),
+    var(--bg);
+}
+.authBox {
+  max-width: 430px;
+  padding: 42px 38px 36px;
+  border-radius: 30px;
+  border: 1px solid rgba(102,115,79,.16);
+  box-shadow: 0 22px 70px rgba(47,49,45,.10);
+  background: rgba(255,255,255,.86);
+  backdrop-filter: blur(12px);
+}
+.logo { margin-bottom: 30px; }
+.logo-mark, .header-logo {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(102,115,79,.14);
+  box-shadow: 0 10px 26px rgba(47,49,45,.10);
+  position: relative;
+  overflow: hidden;
+}
+.logo-mark { width: 70px; height: 70px; border-radius: 22px; margin-bottom: 18px; }
+.header-logo { width: 38px; height: 38px; border-radius: 13px; }
+.logo-mark svg, .header-logo svg { display: none; }
+.logo-mark::before, .header-logo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 64% auto;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 48'%3E%3Cpath d='M37 14a17 17 0 1 0 0 20' fill='none' stroke='%2366734F' stroke-width='9' stroke-linecap='round'/%3E%3Cpath d='M59 14a17 17 0 1 1 0 20' fill='none' stroke='%23D06B43' stroke-width='9' stroke-linecap='round'/%3E%3Ccircle cx='48' cy='24' r='6' fill='%2366734F'/%3E%3C/svg%3E");
+}
+.logo h1 {
+  font-family: var(--font);
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -1.1px;
+  color: var(--text);
+}
+.logo p {
+  color: var(--primary-d);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.8px;
+}
+.tabs {
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 5px;
+  gap: 4px;
+}
+.tabs button {
+  color: var(--text-s);
+  border-radius: 12px;
+  padding: 11px 8px;
+  font-weight: 700;
+}
+.tabs button.active {
+  background: #FFFFFF;
+  color: var(--primary-d);
+  box-shadow: 0 5px 18px rgba(47,49,45,.08);
+}
+.field { margin-bottom: 16px; }
+.field label, .lbl {
+  color: var(--primary-d);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+.field input, .field select, .inp, .sel {
+  background: #FFFFFF;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  min-height: 48px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.75);
+}
+.field input:focus, .field select:focus, .inp:focus, .sel:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(102,115,79,.10);
+}
+.btn-primary, .btn-sm, .btn-send, .resource-link {
+  background: var(--primary);
+  color: #FFFFFF;
+  border-radius: 15px;
+  box-shadow: 0 10px 26px rgba(102,115,79,.25);
+}
+.btn-primary {
+  min-height: 52px;
+  font-weight: 800;
+  margin-top: 8px;
+}
+.btn-primary:hover, .btn-sm:hover, .btn-send:hover, .resource-link:hover { background: var(--primary-d); }
+.link-btn { color: var(--primary-d); font-weight: 800; }
+
+/* App shell */
+header {
+  background: rgba(255,255,255,.88);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(102,115,79,.14);
+}
+.header-inner, main { max-width: 980px; }
+.header-title {
+  font-family: var(--font);
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -.7px;
+}
+.header-sub-text { color: var(--primary-d); font-weight: 700; }
+nav { border-top: 1px solid rgba(102,115,79,.12); }
+nav button { color: var(--text-s); font-weight: 700; padding: 12px 14px; }
+nav button.active { color: var(--primary-d); border-bottom-color: var(--accent); }
+.card, .connectBox, .form-box, .day-detail, .resource-card {
+  border-radius: 24px;
+  border: 1px solid rgba(102,115,79,.14);
+  box-shadow: var(--shadow);
+}
+.card { background: rgba(255,255,255,.9); }
+.card-body { padding: 22px; }
+.section-title h2 { font-size: 22px; color: var(--text); letter-spacing: -.5px; }
+.section-title p { color: var(--text-s); }
+.btn-outline, .btn-secondary, .btn-ghost, .icon-btn {
+  border-color: var(--border);
+  color: var(--primary-d);
+  background: rgba(255,255,255,.72);
+  border-radius: 14px;
+}
+.btn-outline:hover, .btn-secondary:hover, .btn-ghost:hover, .icon-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary-d);
+  background: #FFFFFF;
+}
+
+/* Calendar */
+.cal-day {
+  border-radius: 14px;
+  min-height: 48px;
+  background: #FFFFFF;
+  border-color: var(--border);
+}
+.cal-day.mama { background: rgba(208,107,67,.10); border-color: rgba(208,107,67,.22); }
+.cal-day.papa { background: rgba(102,115,79,.10); border-color: rgba(102,115,79,.22); }
+.cal-day.both { background: rgba(231,221,207,.65); border-color: rgba(102,115,79,.16); }
+.cal-day.today { color: var(--accent); border-color: var(--accent); }
+.cal-day.selected { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(102,115,79,.12); }
+.legend-item, .uf-banner, .balance-bar, .info-tip { background: rgba(255,255,255,.75); border-color: var(--border); }
+.stat-card { border-radius: 18px; }
+
+/* Mobile */
+@media (max-width: 680px) {
+  main { padding: 18px 14px 82px; }
+  .authBox { max-width: 92vw; padding: 36px 26px 30px; border-radius: 28px; }
+  .logo-mark { width: 64px; height: 64px; }
+  .logo h1 { font-size: 31px; }
+  .grid-2, .stat-grid, .info-grid { grid-template-columns: 1fr; }
+  .section-header { gap: 12px; flex-direction: column; }
+  nav button { padding: 11px 12px; }
+}
+
+
+
+/* --- COPADRES V2 UX -------------------------------------- */
+.cal-day { min-height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.cal-num { font-size: 12px; line-height: 1; }
+.custody-mark { font-size: 11px; font-weight: 800; letter-spacing: .2px; line-height: 1; }
+.custody-mark.mama { color: var(--accent); }
+.custody-mark.papa { color: var(--primary-d); }
+.custody-mark.transition { font-size: 14px; opacity: .86; color: var(--taupe); font-weight: 800; }
+.cal-day.transition { background: rgba(231,221,207,.42); border-color: rgba(182,166,146,.45); }
+.event-line { width: 58%; height: 3px; border-radius: 999px; background: var(--primary); opacity: .75; margin-top: 2px; }
+.reminder-line { width: 58%; height: 3px; border-radius: 999px; background: var(--warn); opacity: .75; margin-top: 2px; }
+.prop-flag { position:absolute; top:3px; right:3px; font-size:8px; line-height:1; padding:2px 4px; border-radius:999px; background:rgba(216,137,92,.16); color:var(--accent); border:1px solid rgba(216,137,92,.28); font-weight:800; letter-spacing:.1px; }
+.proposal-alert { background: rgba(216,137,92,.10); border: 1px solid rgba(216,137,92,.25); color: var(--primary-d); border-radius: 13px; padding: 12px 14px; margin-bottom: 14px; font-size: 12px; display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+.proposal-alert strong { color: var(--text); }
+.detail-card { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: 11px 13px; margin-bottom: 8px; font-size: 12px; color: var(--text-s); }
+.detail-card strong { color: var(--text); }
+.exp-subtle { font-size: 11px; color: var(--text-s); margin-top: 3px; }
+.status-chip { display:inline-flex; align-items:center; border-radius: 999px; padding: 3px 9px; font-size: 10px; font-weight: 800; border: 1px solid transparent; }
+.status-chip.no-charge { background: rgba(182,166,146,.18); color: var(--primary-d); border-color: rgba(182,166,146,.30); }
+.status-chip.shared { background: rgba(216,137,92,.12); color: var(--accent); border-color: rgba(216,137,92,.25); }
+.status-chip.closed { background: rgba(122,155,118,.15); color: var(--success); border-color: rgba(122,155,118,.25); }
+.status-chip.pending { background: rgba(184,92,92,.12); color: var(--error); border-color: rgba(184,92,92,.22); }
+.file-pill { font-size: 11px; color: var(--text-s); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 5px 8px; display:inline-block; margin-top: 4px; }
+
+
+
+/* ==========================================================
+   COPADRES UI POLISH v2.1 - Brand board alignment
+   Ajuste visual: tipografía redondeada, menos serif, más aire.
+========================================================== */
+:root {
+  --bg: #F7F2EA;
+  --surface: #FFFFFF;
+  --surface-soft: #FBF8F2;
+  --primary: #6F7B4B;
+  --primary-d: #4F5B35;
+  --salvia: #A7B28C;
+  --accent: #C56A45;
+  --accent-soft: #E9C9BA;
+  --beige: #F2E7DB;
+  --taupe: #B6A692;
+  --text: #2F312C;
+  --text-s: #767364;
+  --border: #E7DCCD;
+  --shadow: 0 12px 34px rgba(47,49,44,.055);
+  --shadow-md: 0 20px 54px rgba(47,49,44,.10);
+  --font: 'Nunito Sans', 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-d: 'Nunito Sans', 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+html, body, button, input, select, textarea {
+  font-family: var(--font) !important;
+}
+
+body {
+  color: var(--text);
+  background:
+    radial-gradient(circle at 12% 8%, rgba(197,106,69,.10), transparent 27%),
+    radial-gradient(circle at 88% 10%, rgba(111,123,75,.10), transparent 32%),
+    linear-gradient(180deg, #FBF8F2 0%, #F7F2EA 100%) !important;
+  letter-spacing: -.01em;
+}
+
+.logo h1, .header-title, .section-title h2 {
+  font-family: var(--font) !important;
+  color: var(--text) !important;
+}
+.logo h1, .header-title {
+  font-weight: 900 !important;
+  letter-spacing: -.055em !important;
+}
+.logo h1 { font-size: 36px !important; line-height: .95 !important; }
+.logo p {
+  color: var(--primary-d) !important;
+  font-weight: 800 !important;
+  letter-spacing: .26em !important;
+}
+
+/* Brand icon */
+.logo-mark, .header-logo {
+  background: #fff !important;
+  border: 1px solid rgba(111,123,75,.12) !important;
+  box-shadow: 0 12px 30px rgba(47,49,44,.09) !important;
+}
+.header-logo { width: 42px !important; height: 42px !important; border-radius: 15px !important; }
+.logo-mark::before, .header-logo::before {
+  background-size: 66% auto !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 48'%3E%3Cpath d='M37 14a17 17 0 1 0 0 20' fill='none' stroke='%236F7B4B' stroke-width='9' stroke-linecap='round'/%3E%3Cpath d='M59 14a17 17 0 1 1 0 20' fill='none' stroke='%23C56A45' stroke-width='9' stroke-linecap='round'/%3E%3Ccircle cx='48' cy='24' r='6' fill='%23D9CDBE'/%3E%3C/svg%3E") !important;
+}
+
+/* Header / nav */
+header {
+  background: rgba(255,255,255,.92) !important;
+  border-bottom: 1px solid rgba(111,123,75,.13) !important;
+  box-shadow: 0 2px 18px rgba(47,49,44,.035) !important;
+}
+.header-top { height: 68px !important; }
+.header-brand { gap: 12px !important; }
+.header-title { font-size: 23px !important; line-height: .95 !important; }
+.header-sub-text {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  color: var(--primary-d) !important;
+  letter-spacing: -.01em !important;
+  margin-top: 3px !important;
+}
+nav {
+  gap: 6px !important;
+  padding: 0 8px !important;
+  border-top: 1px solid rgba(111,123,75,.11) !important;
+}
+nav button {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  color: var(--text-s) !important;
+  padding: 12px 12px !important;
+  border-bottom-width: 3px !important;
+}
+nav button.active {
+  color: var(--text) !important;
+  border-bottom-color: var(--primary) !important;
+}
+nav button svg { stroke-width: 2 !important; }
+
+main { padding-top: 30px !important; }
+.section-title h2 {
+  font-size: 27px !important;
+  line-height: 1.08 !important;
+  font-weight: 900 !important;
+  letter-spacing: -.045em !important;
+}
+.section-title p {
+  font-size: 14px !important;
+  color: var(--text-s) !important;
+  margin-top: 8px !important;
+}
+
+/* Cards and buttons */
+.card, .authBox, .connectBox, .form-box, .day-detail, .resource-card {
+  border-radius: 28px !important;
+  border: 1px solid rgba(111,123,75,.13) !important;
+  box-shadow: var(--shadow) !important;
+}
+.card { background: rgba(255,255,255,.92) !important; }
+.card-body { padding: 28px !important; }
+.btn-primary, .btn-sm, .btn-send, .resource-link {
+  background: var(--primary) !important;
+  border-radius: 16px !important;
+  font-weight: 900 !important;
+  box-shadow: 0 12px 28px rgba(111,123,75,.22) !important;
+}
+.btn-primary:hover, .btn-sm:hover, .btn-send:hover, .resource-link:hover { background: var(--primary-d) !important; }
+.btn-outline, .btn-secondary, .btn-ghost, .icon-btn {
+  border-color: rgba(111,123,75,.22) !important;
+  color: var(--primary-d) !important;
+  background: rgba(255,255,255,.72) !important;
+  border-radius: 15px !important;
+  font-weight: 800 !important;
+}
+
+/* Calendar polish */
+.custody-legend { gap: 10px !important; margin-bottom: 18px !important; }
+.legend-item {
+  border-radius: 14px !important;
+  background: rgba(255,255,255,.72) !important;
+  border: 1px solid rgba(111,123,75,.18) !important;
+  font-weight: 800 !important;
+  color: var(--text-s) !important;
+}
+.dot { border-radius: 999px !important; opacity: .72 !important; }
+.cal-grid { gap: 7px !important; }
+.cal-day-name {
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  color: #8B887A !important;
+  padding: 8px 0 !important;
+}
+.cal-day {
+  min-height: 58px !important;
+  border-radius: 17px !important;
+  background: #FFFFFF !important;
+  border: 1.3px solid rgba(111,123,75,.16) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.85) !important;
+  color: var(--text) !important;
+  transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease !important;
+}
+.cal-day:hover { transform: translateY(-1px); }
+.cal-day.mama {
+  background: rgba(197,106,69,.105) !important;
+  border-color: rgba(197,106,69,.24) !important;
+}
+.cal-day.papa {
+  background: rgba(111,123,75,.105) !important;
+  border-color: rgba(111,123,75,.22) !important;
+}
+.cal-day.both, .cal-day.transition {
+  background: rgba(242,231,219,.78) !important;
+  border-color: rgba(182,166,146,.45) !important;
+}
+.cal-day.selected {
+  border: 2px solid var(--text) !important;
+  box-shadow: 0 0 0 4px rgba(47,49,44,.045) !important;
+}
+.cal-day.today { border-color: var(--accent) !important; color: var(--accent) !important; }
+.cal-num { font-size: 13px !important; font-weight: 800 !important; color: var(--text) !important; }
+.custody-mark {
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  letter-spacing: -.02em !important;
+}
+.custody-mark.mama { color: var(--accent) !important; }
+.custody-mark.papa { color: var(--primary-d) !important; }
+.custody-mark.transition { font-size: 15px !important; opacity: .9 !important; color: var(--taupe) !important; font-weight: 800 !important; }
+.event-line {
+  background: var(--primary) !important;
+  height: 3px !important;
+  width: 54% !important;
+  opacity: .62 !important;
+}
+.prop-flag { font-size: 8px !important; opacity: 1 !important; }
+.proposal-alert {
+  background: rgba(242,231,219,.72) !important;
+  border: 1px solid rgba(197,106,69,.22) !important;
+  border-radius: 20px !important;
+  padding: 16px 18px !important;
+  color: var(--text-s) !important;
+}
+.proposal-alert strong { color: var(--text) !important; font-weight: 900 !important; }
+
+/* Forms / expenses / messages */
+.field label, .lbl, .stat-label, .uf-label, .section-lbl {
+  font-weight: 900 !important;
+  letter-spacing: .08em !important;
+  color: var(--primary-d) !important;
+}
+.inp, .sel, .field input, .field select, textarea.inp {
+  border-radius: 16px !important;
+  border: 1.4px solid rgba(111,123,75,.18) !important;
+  background: rgba(255,255,255,.94) !important;
+  font-weight: 700 !important;
+}
+.msg-bubble { font-weight: 700 !important; }
+.quick-reply-btn {
+  border-radius: 999px !important;
+  border-color: rgba(111,123,75,.20) !important;
+  background: rgba(255,255,255,.78) !important;
+  color: var(--primary-d) !important;
+  font-weight: 800 !important;
+  padding: 8px 14px !important;
+}
+
+footer {
+  border-top: 1px solid rgba(111,123,75,.12) !important;
+  color: #8B887A !important;
+  font-weight: 700 !important;
+  padding: 26px 16px !important;
+}
+
+@media (max-width: 680px) {
+  .header-top { height: 64px !important; }
+  .header-title { font-size: 21px !important; }
+  .section-title h2 { font-size: 24px !important; }
+  main { padding: 22px 14px 84px !important; }
+  .card-body { padding: 22px !important; }
+  .cal-grid { gap: 5px !important; }
+  .cal-day { min-height: 52px !important; border-radius: 15px !important; }
+}
+
+
+
+/* --- COPADRES v2.6 ajustes solicitados --- */
+.transition-symbol { font-size: 15px; font-weight: 900; color: #5E5448; line-height: 1; }
+.custody-mark.transition { color: #5E5448 !important; font-size: 17px !important; font-weight: 900 !important; opacity: 1 !important; filter: none !important; }
+.prop-flag { background:#DCE7F0 !important; color:#4F6B80 !important; border-color:#9DB3C4 !important; font-size:8px !important; }
+.proposal-alert { background:#E6EDF3 !important; border:1px solid #A7BBCB !important; border-left:5px solid #6E8FA8 !important; color:var(--text) !important; }
+.proposal-alert strong { color:#2F312C !important; }
+.event-delete-btn { margin-left:8px; border:0; background:#FBF0F0; color:var(--error); border-radius:8px; padding:4px 7px; font-weight:900; }
+.exp-subtle strong { color:var(--text); }
+
+</style>
+
+</head>
+<body>
+
+<!-- ===========================================================
+     AUTH
+============================================================ -->
+
+<div id="authScreen">
+  <div class="authBox">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="7" r="3"/><circle cx="16" cy="7" r="3"/>
+          <path d="M3 20c0-3.31 2.69-6 6-6s6 2.69 6 6"/>
+          <path d="M19 18c0-2.21-1.34-4-3-4"/>
+        </svg>
+      </div>
+      <h1>CoPadres</h1>
+      <p>by Kindflo</p>
+    </div>
+
+
+<div class="tabs">
+  <button id="tabLoginBtn" class="active">Ingresar</button>
+  <button id="tabRegisterBtn">Crear cuenta</button>
+</div>
+
+<div id="authMsg" class="hidden"></div>
+
+<!-- LOGIN -->
+<div id="loginForm">
+  <div class="field"><label>Correo</label><input type="email" id="loginEmail" placeholder="tu@correo.com"/></div>
+  <div class="field"><label>Contraseña</label><input type="password" id="loginPass" placeholder="••••••••"/></div>
+  <button class="btn-primary" id="loginBtn">Ingresar</button>
+  <p style="text-align:center;margin-top:12px">
+    <button class="link-btn" id="forgotBtn">¿Olvidaste tu contraseña?</button>
+  </p>
+</div>
+
+<!-- REGISTRO -->
+<div id="registerForm" class="hidden">
+  <div class="field"><label>Tu nombre</label><input type="text" id="regName" placeholder="María González"/></div>
+  <div class="field"><label>Correo</label><input type="email" id="regEmail" placeholder="tu@correo.com"/></div>
+  <div class="field"><label>Contraseña</label><input type="password" id="regPass" placeholder="Mínimo 6 caracteres"/></div>
+  <div class="field"><label>Confirmar contraseña</label><input type="password" id="regPass2" placeholder="Repite tu contraseña"/></div>
+  <div class="field">
+    <label>Tipo de familia</label>
+    <select id="regFamType">
+      <option value="mama_papa">Mamá y Papá</option>
+      <option value="papa_papa">Papá y Papá</option>
+      <option value="mama_mama">Mamá y Mamá</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>Yo soy…</label>
+    <select id="regRole">
+      <option value="p1" id="roleP1Opt">Mamá</option>
+      <option value="p2" id="roleP2Opt">Papá</option>
+    </select>
+  </div>
+  <button class="btn-primary" id="registerBtn">Crear cuenta</button>
+</div>
+
+<!-- FORGOT -->
+<div id="forgotForm" class="hidden">
+  <p style="font-size:13px;color:var(--text-s);margin-bottom:16px">Te enviaremos un enlace para restablecer tu contraseña.</p>
+  <div class="field"><label>Correo</label><input type="email" id="resetEmail" placeholder="tu@correo.com"/></div>
+  <button class="btn-primary" id="resetBtn">Enviar enlace</button>
+  <p style="text-align:center;margin-top:12px">
+    <button class="link-btn" id="backBtn">← Volver</button>
+  </p>
+</div>
+
+
+  </div>
+</div>
+
+<!-- ===========================================================
+     CONNECT
+============================================================ -->
+
+<div id="connectScreen" class="hidden">
+  <div class="connectBox">
+    <div style="margin-bottom:22px">
+      <h2 style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:6px">Invitar a co-padre/madre</h2>
+      <p style="font-size:13px;color:var(--text-s)">Envíale un link por WhatsApp para conectarse automáticamente</p>
+    </div>
+    <div class="invite-box">
+      <p class="lbl" style="margin-bottom:9px">Tu link de invitación</p>
+      <div id="inviteLinkDisplay" class="invite-link-display">Generando link...</div>
+      <button id="whatsappBtn" class="btn-whatsapp">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        Invitar por WhatsApp
+      </button>
+    </div>
+    <div id="connectMsg" class="hidden"></div>
+    <p style="text-align:center;margin-top:14px">
+      <button class="link-btn" id="skipBtn">Hacer esto más tarde</button>
+    </p>
+  </div>
+</div>
+
+<!-- ===========================================================
+     APP
+============================================================ -->
+
+<div id="app">
+  <header>
+    <div class="header-inner">
+      <div class="header-top">
+        <div class="header-brand">
+          <div class="header-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="7" r="3"/><circle cx="16" cy="7" r="3"/>
+              <path d="M3 20c0-3.31 2.69-6 6-6s6 2.69 6 6"/>
+              <path d="M19 18c0-2.21-1.34-4-3-4"/>
+            </svg>
+          </div>
+          <div>
+            <div class="header-title">CoPadres</div>
+            <div class="header-sub-text" id="headerSub">by Kindflo</div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" id="inviteBtn" title="Invitar">
+            <i data-lucide="link" style="width:16px;height:16px"></i>
+          </button>
+          <button class="icon-btn" id="logoutBtn" title="Salir">
+            <i data-lucide="log-out" style="width:16px;height:16px"></i>
+          </button>
+        </div>
+      </div>
+
+
+  <nav id="mainNav">
+    <button class="active" data-tab="calendar">
+      <i data-lucide="calendar-days"></i> Calendario
+    </button>
+    <button data-tab="expenses">
+      <i data-lucide="receipt-text"></i> Gastos
+    </button>
+    <button data-tab="messages">
+      <i data-lucide="message-circle"></i> Mensajes
+    </button>
+    <button data-tab="children">
+      <i data-lucide="users-round"></i> Hijos
+    </button>
+    <button data-tab="agreements">
+      <i data-lucide="folder-open"></i> Acuerdos
+    </button>
+    <button data-tab="reminders">
+      <i data-lucide="bell"></i> Recordatorios
+    </button>
+    <button data-tab="recursos">
+      <i data-lucide="landmark"></i> Recursos
+    </button>
+  </nav>
+</div>
+
+
+  </header>
+
+  <main>
+
+
+<!-- -- CALENDARIO ---------------------------------------- -->
+<div id="tab-calendar">
+  <div class="section-header">
+    <div class="section-title">
+      <h2>Calendario de Custodia</h2>
+      <p>Planifica los días con tus hijos</p>
+    </div>
+  </div>
+
+  <div class="custody-legend">
+    <div class="legend-item"><div class="dot" style="background:var(--accent)"></div><span id="leg1">Mamá</span></div>
+    <div class="legend-item"><div class="dot" style="background:var(--primary-d)"></div><span id="leg2">Papá</span></div>
+    <div class="legend-item"><span class="transition-symbol">↔</span><span>Cambio de casa</span></div>
+  </div>
+
+  <div id="pendingProposals"></div>
+
+  <div class="card">
+    <div class="card-body">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <button class="btn-outline" id="prevMonthBtn" style="padding:8px 12px">
+          <i data-lucide="chevron-left" style="width:16px;height:16px"></i>
+        </button>
+        <strong id="calMonthTitle" style="font-size:16px;color:var(--text)"></strong>
+        <button class="btn-outline" id="nextMonthBtn" style="padding:8px 12px">
+          <i data-lucide="chevron-right" style="width:16px;height:16px"></i>
+        </button>
+      </div>
+      <div class="cal-grid" id="calDayNames"></div>
+      <div class="cal-grid" id="calGrid" style="margin-top:4px"></div>
+
+      <div id="dayDetail" class="day-detail hidden">
+        <div class="day-detail-title">
+          <i data-lucide="calendar-days"></i> Día <span id="detailDay"></span>
+        </div>
+        <div id="detailEvents" style="margin-bottom:10px"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-outline" id="toggleEvBtn">
+            <i data-lucide="plus"></i> Evento
+          </button>
+          <button class="btn-outline" id="togglePropBtn">
+            <i data-lucide="arrow-left-right"></i> Proponer cambio
+          </button>
+        </div>
+        <div id="evForm" class="hidden" style="margin-top:12px;display:flex;gap:8px">
+          <input class="inp" id="evInput" placeholder="Descripción del evento..." style="flex:1"/>
+          <button class="btn-sm" id="saveEvBtn">Guardar</button>
+        </div>
+        <div id="propForm" class="hidden" style="margin-top:12px;display:grid;gap:9px">
+          <div class="grid-2">
+            <input class="inp" type="number" id="propFrom" placeholder="Día actual"/>
+            <input class="inp" type="number" id="propTo" placeholder="Nuevo día"/>
+          </div>
+          <input class="inp" id="propReason" placeholder="Razón del cambio"/>
+          <div style="display:flex;gap:8px">
+            <button class="btn-sm" id="savePropBtn">Enviar</button>
+            <button class="btn-outline" id="cancelPropBtn">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- -- GASTOS -------------------------------------------- -->
+<div id="tab-expenses" class="hidden">
+  <div class="section-header">
+    <div class="section-title"><h2>Gastos Compartidos</h2><p>Registro claro y transparente</p></div>
+    <button class="btn-sm" id="toggleExpBtn"><i data-lucide="plus"></i> Agregar</button>
+  </div>
+
+  <div class="uf-banner">
+    <div class="uf-label">Valor UF actual</div>
+    <div id="ufDisplay" class="uf-val">Cargando...</div>
+  </div>
+
+  <div class="stat-grid" id="expStats"></div>
+  <div id="balanceBar" class="balance-bar"></div>
+
+  <div id="expForm" class="hidden form-box">
+    <p style="font-weight:700;font-size:15px;color:var(--primary);margin-bottom:14px">Agregar gasto</p>
+    <div style="display:grid;gap:11px">
+      <input class="inp" id="expDesc" placeholder="Descripción del gasto"/>
+      <div class="currency-toggle">
+        <button id="btnCLP" class="cur-active">$ CLP</button>
+        <button id="btnUF">UF</button>
+      </div>
+      <div id="ufHint" class="hidden" style="background:rgba(95,124,110,.08);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--text-s)"></div>
+      <div class="grid-2">
+        <input class="inp" type="number" id="expAmount" placeholder="Monto"/>
+        <select class="sel" id="expFrequency">
+          <option value="unique">Único / puntual</option>
+          <option value="monthly">Mensual</option>
+          <option value="annual">Anual</option>
+          <option value="weekly">Semanal</option>
+        </select>
+      </div>
+      <div class="grid-2">
+        <select class="sel" id="expCat">
+          <option value="Educación">Educación</option>
+          <option value="Salud">Salud</option>
+          <option value="Vida cotidiana">Vida cotidiana</option>
+          <option value="Gastos extraordinarios">Gastos extraordinarios</option>
+        </select>
+        <select class="sel" id="expSubcat"></select>
+      </div>
+      <select class="sel" id="expTreatment">
+        <option value="pension">Considerada en la pensión de alimentos (Registro no cobrable)</option>
+        <option value="shared">Compartido entre ambos</option>
+        <option value="mama_only">Pagado solo por Mamá</option>
+        <option value="papa_only">Pagado solo por Papá</option>
+      </select>
+      <div class="grid-2" id="expPaymentActors">
+        <select class="sel" id="expPaidBy">
+          <option value="mama" id="expOptMama">Pagado por Mamá</option>
+          <option value="papa" id="expOptPapa">Pagado por Papá</option>
+        </select>
+        <div id="expHealthRefundBox" class="hidden">
+          <select class="sel" id="expHealthRefund" style="width:100%">
+            <option value="pending">Reembolso de salud pendiente</option>
+            <option value="yes">Sí genera reembolso</option>
+            <option value="no">No genera reembolso</option>
+          </select>
+        </div>
+      </div>
+      <div id="expDistributionBox" class="hidden" style="background:rgba(255,255,255,.62);border:1px solid var(--border);border-radius:14px;padding:12px 14px">
+        <label class="lbl">Distribución del gasto</label>
+        <div class="grid-2">
+          <div>
+            <div class="exp-subtle" id="pctMamaLbl">Mamá</div>
+            <select class="sel" id="pctMama" style="width:100%"></select>
+          </div>
+          <div>
+            <div class="exp-subtle" id="pctPapaLbl">Papá</div>
+            <select class="sel" id="pctPapa" style="width:100%"></select>
+          </div>
+        </div>
+      </div>
+      <div id="expDistributionHint" class="exp-subtle" style="font-weight:800;color:var(--primary-d)"></div>
+      <label class="lbl">Respaldo del gasto</label>
+      <input class="inp" type="file" id="expFile" accept="image/*,.pdf" />
+      <div class="exp-subtle">📎 Boleta, ticket o factura del gasto realizado.</div>
+      <div id="reimburseBox">
+        <label class="lbl">Respaldo del pago adeudado por el otro padre/madre</label>
+        <input class="inp" type="file" id="expReimburseFile" accept="image/*,.pdf" />
+        <div class="exp-subtle">📎 Comprobante de transferencia o depósito de la parte correspondiente.</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-sm" id="saveExpBtn">Guardar</button>
+        <button class="btn-outline" id="cancelExpBtn">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div>
+        <span style="color:var(--text);font-weight:700;font-size:13px">Historial</span>
+        <span id="expCount" style="font-size:11px;color:var(--text-s);font-weight:400;margin-left:8px"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:10px;color:var(--text-s);font-weight:700;text-transform:uppercase;letter-spacing:.6px">Periodo</span><div class="period-filter" style="margin-bottom:0;max-width:360px;min-width:260px">
+        <button class="active" data-period="week">Semana</button>
+        <button data-period="month">Mes</button>
+        <button data-period="year">Año</button>
+        <button data-period="all">Todo</button>
+      </div></div>
+    </div>
+    <div id="expList"></div>
+  </div>
+</div>
+
+<!-- -- MENSAJES ------------------------------------------ -->
+<div id="tab-messages" class="hidden">
+  <div class="section-header">
+    <div class="section-title"><h2>Mensajes</h2><p>Comunicación enfocada en los niños</p></div>
+  </div>
+  <div class="info-tip">
+    <i data-lucide="info"></i>
+    Mantén la comunicación enfocada en el bienestar de los niños.
+  </div>
+  <div id="quickReplies" class="quick-replies"></div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="msg-list" id="msgList"></div>
+  </div>
+  <div class="msg-input-row">
+    <input class="inp" id="msgInput" placeholder="Escribe un mensaje…"/>
+    <button class="btn-send" id="sendMsgBtn">
+      Enviar <i data-lucide="send"></i>
+    </button>
+  </div>
+</div>
+
+<!-- -- HIJOS --------------------------------------------- -->
+<div id="tab-children" class="hidden">
+  <div class="section-header">
+    <div class="section-title"><h2>Perfiles de Hijos</h2><p>Información importante</p></div>
+    <button class="btn-sm" id="openKidFormBtn"><i data-lucide="plus"></i> Agregar</button>
+  </div>
+  <div id="kidForm" class="hidden form-box">
+    <p style="font-weight:700;font-size:15px;color:var(--primary);margin-bottom:14px" id="kidFormTitle">Agregar hijo</p>
+    <input type="hidden" id="editKidId"/>
+    <div style="display:grid;gap:10px">
+      <div class="grid-2">
+        <div><label class="lbl">Nombre</label><input class="inp" id="kidName" placeholder="Nombre completo"/></div>
+        <div><label class="lbl">Fecha de nacimiento</label><input class="inp" type="date" id="kidBirth"/></div>
+      </div>
+      <div class="grid-2">
+        <div><label class="lbl">Edad</label><input class="inp" id="kidAge" placeholder="Se calcula desde fecha de nacimiento" disabled/></div>
+        <div><label class="lbl">Colegio</label><input class="inp" id="kidSchool" placeholder="Nombre del colegio"/></div>
+      </div>
+      <div class="grid-2">
+        <div><label class="lbl">Doctor / Pediatra</label><input class="inp" id="kidDoctor" placeholder="Nombre del médico"/></div>
+        <div><label class="lbl">Clínica preferente</label><input class="inp" id="kidClinic" placeholder="Clínica preferente"/></div>
+      </div>
+      <div class="grid-2">
+        <div><label class="lbl">Seguro escolar</label><input class="inp" id="kidSchoolInsurance" placeholder="Clínica / cobertura"/></div>
+        <div><label class="lbl">Grupo sanguíneo</label><input class="inp" id="kidBlood" placeholder="Ej: O+"/></div>
+      </div>
+      <div><label class="lbl">Alergias</label><input class="inp" id="kidAllergies" placeholder="Alergias conocidas"/></div>
+      <div><label class="lbl">Notas</label><textarea class="inp" id="kidNotes" placeholder="Información importante…" style="min-height:64px;resize:vertical"></textarea></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-sm" id="saveKidBtn">Guardar</button>
+        <button class="btn-outline" id="cancelKidBtn">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  <div id="kidList"></div>
+</div>
+
+<!-- -- ACUERDOS ------------------------------------------ -->
+<div id="tab-agreements" class="hidden">
+  <div class="section-header">
+    <div class="section-title"><h2>Acuerdos</h2><p>Registro de acuerdos entre ambos padres</p></div>
+    <button class="btn-sm" id="toggleAgrBtn"><i data-lucide="plus"></i> Nuevo</button>
+  </div>
+  <div id="agrForm" class="hidden form-box">
+    <p style="font-weight:700;font-size:15px;color:var(--primary);margin-bottom:14px">Nuevo acuerdo</p>
+    <div style="display:grid;gap:10px">
+      <input class="inp" id="agrTitle" placeholder="Título del acuerdo"/>
+      <div class="grid-2">
+        <select class="sel" id="agrCat"><option>Custodia</option><option>Económico</option><option>Salud</option><option>Educación</option><option>Vacaciones</option><option>Otro</option></select>
+        <select class="sel" id="agrStatus"><option>Activo</option><option>En revisión</option><option>Completado</option></select>
+      </div>
+      <textarea class="inp" id="agrContent" placeholder="Contenido del acuerdo…" style="min-height:84px;resize:vertical"></textarea>
+      <div style="display:flex;gap:8px">
+        <button class="btn-sm" id="saveAgrBtn">Guardar</button>
+        <button class="btn-outline" id="cancelAgrBtn">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  <div id="agrList"></div>
+</div>
+
+<!-- -- RECORDATORIOS ------------------------------------- -->
+<div id="tab-reminders" class="hidden">
+  <div class="section-header">
+    <div class="section-title"><h2>Recordatorios</h2><p>No olvides ningún compromiso</p></div>
+    <button class="btn-sm" id="toggleRemBtn"><i data-lucide="plus"></i> Agregar</button>
+  </div>
+  <div id="remForm" class="hidden form-box">
+    <p style="font-weight:700;font-size:15px;color:var(--primary);margin-bottom:14px">Nuevo recordatorio</p>
+    <div style="display:grid;gap:10px">
+      <input class="inp" id="remTitle" placeholder="Título"/>
+      <div class="grid-2">
+        <input class="inp" type="datetime-local" id="remDate"/>
+        <select class="sel" id="remFor">
+          <option value="both">Ambos</option>
+          <option value="mama" id="remOptMama">Mamá</option>
+          <option value="papa" id="remOptPapa">Papá</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-sm" id="saveRemBtn">Guardar</button>
+        <button class="btn-outline" id="cancelRemBtn">Cancelar</button>
+      </div>
+    </div>
+  </div>
+  <div id="remList"></div>
+</div>
+
+<!-- -- RECURSOS ------------------------------------------ -->
+<div id="tab-recursos" class="hidden">
+  <div class="section-header">
+    <div class="section-title"><h2>Recursos de Apoyo</h2><p>Organismos clave para familias en Chile</p></div>
+  </div>
+  <div class="emergency-card">
+    <div>
+      <div style="color:var(--text);font-weight:800;font-size:15px">📞 Fono Familia - 149</div>
+      <div style="color:var(--text-s);font-size:12px;margin-top:3px">Atención gratuita 24/7 · Carabineros</div>
+    </div>
+    <a href="tel:149">Llamar</a>
+  </div>
+  <div id="resourcesList"></div>
+</div>
+
+
+  </main>
+  <footer>CoPadres by Kindflo · Chile · 2026</footer>
+</div>
+
+<script>
+// --- FIREBASE -----------------------------------------------
+firebase.initializeApp({
+  apiKey: "AIzaSyCPNF2HQ2x23Pbo2rAqBCkcqddSm7-BJkk",
+  authDomain: "kindflo-copadres.firebaseapp.com",
+  projectId: "kindflo-copadres",
+  storageBucket: "kindflo-copadres.firebasestorage.app",
+  messagingSenderId: "442877008580",
+  appId: "1:442877008580:web:2dfb169fb0e754be824791"
+});
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// --- ESTADO -------------------------------------------------
+let USER = null, USERDATA = null, CODATA = null, FAMILY_ID = null;
+let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
+let selDay = null, custodyMap = {}, calEventsMap = {};
+let expenses = [], messages = [], children = [], agreements = [], reminders = [], proposals = [];
+let expPeriod = 'week', expCurrency = 'CLP', UF = 38650;
+let expandedAgr = null;
+
+// --- HELPERS ------------------------------------------------
+const $ = id => document.getElementById(id);
+const show = id => $(id).classList.remove('hidden');
+const hide = id => $(id).classList.add('hidden');
+const fmtCLP = n => '$' + Math.round(n).toLocaleString('es-CL');
+const fmtUF = n => 'UF ' + parseFloat(n).toFixed(2).replace('.', ',');
+const genCode = () => Math.random().toString(36).slice(2, 8).toUpperCase();
+const p1 = () => USERDATA && USERDATA.familyConfig ? USERDATA.familyConfig.p1Label : 'Mamá';
+const p2 = () => USERDATA && USERDATA.familyConfig ? USERDATA.familyConfig.p2Label : 'Papá';
+const myRole = () => USERDATA ? USERDATA.role : 'p1';
+const myLabel = () => myRole() === 'p1' ? p1() : p2();
+const famCol = name => db.collection('families').doc(FAMILY_ID).collection(name);
+
+function showMsg(id, text, isError) {
+  var el = $(id);
+  el.textContent = text;
+  el.className = isError ? 'msg-error' : 'msg-ok';
+  el.classList.remove('hidden');
+}
+function hideMsg(id) { $(id).classList.add('hidden'); }
+
+const AUTH_ERRORS = {
+  'auth/user-not-found': 'No existe cuenta con ese correo',
+  'auth/wrong-password': 'Contraseña incorrecta',
+  'auth/email-already-in-use': 'El correo ya está registrado',
+  'auth/weak-password': 'Mínimo 6 caracteres',
+  'auth/invalid-email': 'Correo inválido',
+  'auth/too-many-requests': 'Demasiados intentos. Espera unos minutos.',
+  'auth/invalid-credential': 'Correo o contraseña incorrectos'
+};
+const errMsg = code => AUTH_ERRORS[code] || 'Error inesperado. Intenta de nuevo.';
+
+// --- AUTH FUNCIONES ------------------------------------------
+function switchToLogin() {
+  show('loginForm'); hide('registerForm'); hide('forgotForm');
+  $('tabLoginBtn').classList.add('active');
+  $('tabRegisterBtn').classList.remove('active');
+  hideMsg('authMsg');
+}
+function switchToRegister() {
+  hide('loginForm'); show('registerForm'); hide('forgotForm');
+  $('tabLoginBtn').classList.remove('active');
+  $('tabRegisterBtn').classList.add('active');
+  hideMsg('authMsg');
+}
+function switchToForgot() {
+  hide('loginForm'); hide('registerForm'); show('forgotForm');
+  hideMsg('authMsg');
+}
+
+function updateRoleOptions() {
+  var ft = $('regFamType').value;
+  var labels = { mama_papa: ['Mamá', 'Papá'], papa_papa: ['Papá 1', 'Papá 2'], mama_mama: ['Mamá 1', 'Mamá 2'] };
+  $('roleP1Opt').textContent = labels[ft][0];
+  $('roleP2Opt').textContent = labels[ft][1];
+}
+
+async function doLogin() {
+  hideMsg('authMsg');
+  var email = $('loginEmail').value.trim();
+  var pass = $('loginPass').value;
+  if (!email || !pass) { showMsg('authMsg', 'Completa todos los campos', true); return; }
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch(e) {
+    showMsg('authMsg', errMsg(e.code), true);
+  }
+}
+
+async function doRegister() {
+  hideMsg('authMsg');
+  var name = $('regName').value.trim();
+  var email = $('regEmail').value.trim();
+  var pass = $('regPass').value;
+  var pass2 = $('regPass2').value;
+  if (!name || !email || !pass || !pass2) { showMsg('authMsg', 'Completa todos los campos', true); return; }
+  if (pass !== pass2) { showMsg('authMsg', 'Las contraseñas no coinciden', true); return; }
+  if (pass.length < 6) { showMsg('authMsg', 'Mínimo 6 caracteres', true); return; }
+  try {
+    var cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await cred.user.updateProfile({ displayName: name });
+    var ft = $('regFamType').value;
+    var role = $('regRole').value;
+    var labels = { mama_papa: ['Mamá', 'Papá'], papa_papa: ['Papá 1', 'Papá 2'], mama_mama: ['Mamá 1', 'Mamá 2'] };
+    var fc = { type: ft, p1Label: labels[ft][0], p2Label: labels[ft][1] };
+    var inviteCode = genCode();
+    var famRef = await db.collection('families').add({
+      members: [cred.user.uid], config: fc,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await db.collection('users').doc(cred.user.uid).set({
+      name: name, email: email, role: role,
+      familyConfig: fc, inviteCode: inviteCode,
+      familyId: famRef.id, coparentId: null,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch(e) {
+    showMsg('authMsg', errMsg(e.code), true);
+  }
+}
+
+async function doReset() {
+  hideMsg('authMsg');
+  var email = $('resetEmail').value.trim();
+  if (!email) { showMsg('authMsg', 'Ingresa tu correo', true); return; }
+  try {
+    await auth.sendPasswordResetEmail(email);
+    showMsg('authMsg', 'Correo enviado. Revisa tu bandeja.', false);
+  } catch(e) {
+    showMsg('authMsg', errMsg(e.code), true);
+  }
+}
+
+// --- CONNECT ------------------------------------------------
+function showConnectScreen() {
+  hide('authScreen'); hide('app'); show('connectScreen');
+  if (USERDATA && USERDATA.inviteCode) {
+    var link = 'https://franciscamarticorena-commits.github.io/CoPadres-/?invite=' + USERDATA.inviteCode;
+    $('inviteLinkDisplay').textContent = link;
+    $('whatsappBtn').onclick = function() {
+      var msg = encodeURIComponent('Hola! Te invito a conectarte en CoPadres para coordinar mejor los temas de nuestros hijos. Entra aqui: ' + link);
+      window.open('https://wa.me/?text=' + msg, '_blank');
+    };
+  }
+}
+
+async function autoConnect(code) {
+  try {
+    var snap = await db.collection('users').where('inviteCode', '==', code).get();
+    if (snap.empty) { loadApp(); return; }
+    var otherDoc = snap.docs[0];
+    var otherId = otherDoc.id;
+    if (otherId === USER.uid) { loadApp(); return; }
+    var otherData = otherDoc.data();
+    var famId = (USERDATA && USERDATA.familyId) || otherData.familyId;
+    var batch = db.batch();
+    batch.update(db.collection('users').doc(USER.uid), { coparentId: otherId, familyId: famId });
+    batch.update(db.collection('users').doc(otherId), { coparentId: USER.uid, familyId: famId });
+    if (famId) {
+      batch.update(db.collection('families').doc(famId), {
+        members: firebase.firestore.FieldValue.arrayUnion(USER.uid, otherId)
+      });
+    }
+    await batch.commit();
+    window.history.replaceState({}, '', './');
+    loadApp();
+  } catch(e) {
+    loadApp();
+  }
+}
+
+// --- AUTH LISTENER -------------------------------------------
+auth.onAuthStateChanged(function(u) {
+  USER = u;
+  if (!u) {
+    show('authScreen');
+    document.getElementById('authScreen').style.display = 'flex';
+    hide('connectScreen'); hide('app');
+    return;
+  }
+  hide('authScreen');
+  document.getElementById('app').style.display = 'block';
+  var urlParams = new URLSearchParams(window.location.search);
+  var inviteCode = urlParams.get('invite');
+
+  db.collection('users').doc(u.uid).get().then(function(snap) {
+    if (!snap.exists) return;
+    USERDATA = snap.data();
+    FAMILY_ID = USERDATA.familyId;
+
+    if (USERDATA.coparentId) {
+      db.collection('users').doc(USERDATA.coparentId).get().then(function(co) {
+        if (co.exists) CODATA = co.data();
+        updateLabels();
+        loadApp();
+      }).catch(function() {
+        updateLabels();
+        loadApp();
+      });
+    } else {
+      updateLabels();
+      if (inviteCode) {
+        autoConnect(inviteCode);
+      } else {
+        showConnectScreen();
+      }
+    }
+  }).catch(function(e) {
+    console.log('Error loading user:', e);
+  });
+});
+
+function displayNameWithRole(data, role) {
+  var nm = data && data.name ? data.name.split(' ')[0] : '';
+  var label = role === 'p1' ? p1() : p2();
+  return (nm || label) + ' (' + label + ')';
+}
+
+function updateLabels() {
+  if ($('leg1')) $('leg1').textContent = p1();
+  if ($('leg2')) $('leg2').textContent = p2();
+  if ($('expOptMama')) $('expOptMama').textContent = 'Pagado por ' + p1();
+  if ($('expOptPapa')) $('expOptPapa').textContent = 'Pagado por ' + p2();
+  if ($('pctMamaLbl')) $('pctMamaLbl').textContent = p1();
+  if ($('pctPapaLbl')) $('pctPapaLbl').textContent = p2();
+  if ($('remOptMama')) $('remOptMama').textContent = p1();
+  if ($('remOptPapa')) $('remOptPapa').textContent = p2();
+  if ($('expPaidBy')) $('expPaidBy').value = myRole() === 'p1' ? 'mama' : 'papa';
+  if ($('headerSub')) {
+    var sub = USERDATA ? displayNameWithRole(USERDATA, myRole()) : 'by Kindflo';
+    if (CODATA && CODATA.name) sub += ' · con ' + CODATA.name.split(' ')[0];
+    $('headerSub').textContent = sub;
+  }
+}
+
+// --- LOAD APP -----------------------------------------------
+function loadApp() {
+  hide('authScreen'); hide('connectScreen'); show('app');
+  updateLabels();
+  if (!FAMILY_ID) return;
+  setupListeners();
+  fetchUF();
+  renderResources();
+  renderQuickReplies();
+  renderCalendar();
+}
+
+function setupListeners() {
+  famCol('expenses').orderBy('date', 'desc').onSnapshot(function(s) {
+    expenses = s.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
+    renderExpenses();
+  });
+  famCol('messages').orderBy('createdAt', 'asc').onSnapshot(function(s) {
+    messages = s.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
+    renderMessages();
+  });
+  famCol('children').onSnapshot(function(s) {
+    children = s.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
+    renderChildren();
+  });
+  famCol('agreements').orderBy('date', 'desc').onSnapshot(function(s) {
+    agreements = s.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
+    renderAgreements();
+  });
+  famCol('reminders').orderBy('date', 'asc').onSnapshot(function(s) {
+    reminders = s.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
+    renderReminders();
+  });
+  famCol('proposals').orderBy('date', 'desc').onSnapshot(function(s) {
+    proposals = s.docs.map(function(d) { return Object.assign({ id: d.id }, d.data()); });
+    renderProposals();
+  });
+  famCol('calendar').onSnapshot(function(s) {
+    custodyMap = {}; calEventsMap = {};
+    s.docs.forEach(function(d) {
+      var data = d.data();
+      if (data.custody) custodyMap[d.id] = data.custody;
+      if (data.events) calEventsMap[d.id] = data.events;
+    });
+    renderCalendar();
+  });
+}
+
+// --- EVENT LISTENERS ----------------------------------------
+window.addEventListener('DOMContentLoaded', function() {
+  lucide.createIcons();
+
+  // Auth
+  $('tabLoginBtn').addEventListener('click', switchToLogin);
+  $('tabRegisterBtn').addEventListener('click', switchToRegister);
+  $('loginBtn').addEventListener('click', doLogin);
+  $('registerBtn').addEventListener('click', doRegister);
+  $('resetBtn').addEventListener('click', doReset);
+  $('forgotBtn').addEventListener('click', switchToForgot);
+  $('backBtn').addEventListener('click', switchToLogin);
+  $('regFamType').addEventListener('change', updateRoleOptions);
+
+  // Connect
+  $('skipBtn').addEventListener('click', function() { loadApp(); });
+
+  // App header
+  $('inviteBtn').addEventListener('click', showConnectScreen);
+  $('logoutBtn').addEventListener('click', function() { auth.signOut(); });
+
+  // Nav tabs
+  document.querySelectorAll('#mainNav button').forEach(function(btn) {
+    btn.addEventListener('click', function() { switchTab(btn.dataset.tab); });
+  });
+
+  // Period filter
+  document.querySelectorAll('.period-filter button').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      expPeriod = btn.dataset.period;
+      document.querySelectorAll('.period-filter button').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      renderExpenses();
+    });
+  });
+
+  // Calendar
+  $('prevMonthBtn').addEventListener('click', prevMonth);
+  $('nextMonthBtn').addEventListener('click', nextMonth);
+  if ($('cycleCustBtn')) $('cycleCustBtn').addEventListener('click', cycleCustody);
+  $('toggleEvBtn').addEventListener('click', function() { $('evForm').classList.toggle('hidden'); });
+  $('saveEvBtn').addEventListener('click', saveEvent);
+  $('togglePropBtn').addEventListener('click', function() { $('propForm').classList.toggle('hidden'); });
+  $('savePropBtn').addEventListener('click', saveProp);
+  $('cancelPropBtn').addEventListener('click', function() { hide('propForm'); });
+
+  // Expenses
+  $('toggleExpBtn').addEventListener('click', function() { $('expForm').classList.toggle('hidden'); });
+  $('saveExpBtn').addEventListener('click', saveExp);
+  $('cancelExpBtn').addEventListener('click', function() { hide('expForm'); });
+  $('expCat').addEventListener('change', function(){ updateExpenseSubcats(); updateExpenseTreatmentUI(); });
+  if ($('expTreatment')) $('expTreatment').addEventListener('change', updateExpenseTreatmentUI);
+  updateExpenseSubcats();
+  updateExpenseTreatmentUI();
+  $('btnCLP').addEventListener('click', function() { setCurrency('CLP'); });
+  $('btnUF').addEventListener('click', function() { setCurrency('UF'); });
+
+  // Messages
+  $('sendMsgBtn').addEventListener('click', sendMsg);
+  $('msgInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') sendMsg(); });
+
+  // Children
+  $('openKidFormBtn').addEventListener('click', function() { openKidForm(null); });
+  $('saveKidBtn').addEventListener('click', saveKid);
+  if ($('kidBirth')) $('kidBirth').addEventListener('change', function(){ $('kidAge').value = this.value ? calcAge(this.value) + ' años' : ''; });
+  $('cancelKidBtn').addEventListener('click', function() { hide('kidForm'); });
+
+  // Agreements
+  $('toggleAgrBtn').addEventListener('click', function() { $('agrForm').classList.toggle('hidden'); });
+  $('saveAgrBtn').addEventListener('click', saveAgr);
+  $('cancelAgrBtn').addEventListener('click', function() { hide('agrForm'); });
+
+  // Reminders
+  $('toggleRemBtn').addEventListener('click', function() { $('remForm').classList.toggle('hidden'); });
+  $('saveRemBtn').addEventListener('click', saveRem);
+  $('cancelRemBtn').addEventListener('click', function() { hide('remForm'); });
+});
+
+// --- TABS ---------------------------------------------------
+function switchTab(tab) {
+  ['calendar', 'expenses', 'messages', 'children', 'agreements', 'reminders', 'recursos'].forEach(function(t) {
+    $('tab-' + t).classList.toggle('hidden', t !== tab);
+  });
+  document.querySelectorAll('#mainNav button').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+}
+
+// --- UF -----------------------------------------------------
+function fetchUF() {
+  fetch('https://mindicador.cl/api/uf')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      UF = d.serie[0].valor;
+      var fecha = new Date(d.serie[0].fecha).toLocaleDateString('es-CL', { day: 'numeric', month: 'long' });
+      $('ufDisplay').textContent = fmtCLP(UF) + ' · ' + fecha;
+      $('ufHint').textContent = '1 UF = ' + fmtCLP(UF);
+      renderExpenses();
+    })
+    .catch(function() { $('ufDisplay').textContent = fmtCLP(UF) + ' (referencial)'; });
+}
+
+// --- CALENDARIO ---------------------------------------------
+function calKey() { return calYear + '-' + String(calMonth + 1).padStart(2, '0'); }
+function getCustody(d) { return custodyMap[calKey()] && custodyMap[calKey()][d] ? custodyMap[calKey()][d] : (d % 7 < 3 ? 'mama' : d % 7 === 3 ? 'transition' : 'papa'); }
+function getEvs(d) { return calEventsMap[calKey()] && calEventsMap[calKey()][d] ? calEventsMap[calKey()][d] : []; }
+function remindersForDay(day) {
+  return reminders.filter(function(r) {
+    if (!r.date) return false;
+    var rd = new Date(r.date);
+    return rd.getFullYear() === calYear && rd.getMonth() === calMonth && rd.getDate() === day && !r.done;
+  });
+}
+
+function setCustody(d, val) {
+  if (!FAMILY_ID) return;
+  var key = calKey();
+  var update = { custody: {} };
+  update.custody[d] = val;
+  db.collection('families').doc(FAMILY_ID).collection('calendar').doc(key).set(update, { merge: true });
+}
+
+function cycleCustody() {
+  if (!selDay) return;
+  var o = ['mama', 'papa', 'transition'];
+  var cur = getCustody(selDay);
+  setCustody(selDay, o[(o.indexOf(cur) + 1) % 3]);
+}
+
+function prevMonth() {
+  if (calMonth === 0) { calYear--; calMonth = 11; } else calMonth--;
+  selDay = null; renderCalendar();
+}
+function nextMonth() {
+  if (calMonth === 11) { calYear++; calMonth = 0; } else calMonth++;
+  selDay = null; renderCalendar();
+}
+
+
+function fmtDateTime(v) {
+  try {
+    var d = v && v.toDate ? v.toDate() : v ? new Date(v) : new Date();
+    return d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short' }) + ' · ' + d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+  } catch(e) { return ''; }
+}
+function proposalTouchesDay(pr, day) { return String(pr.fromDay) === String(day) || String(pr.toDay) === String(day); }
+function pendingProposalForDay(day) { return proposals.find(function(pr) { return pr.status === 'pending' && proposalTouchesDay(pr, day); }); }
+function proposalsForDay(day) { return proposals.filter(function(pr) { return proposalTouchesDay(pr, day); }); }
+function custodySymbol(c) {
+  if (c === 'mama') return '<span class="custody-mark mama">M</span>';
+  if (c === 'papa') return '<span class="custody-mark papa">P</span>';
+  return '<span class="custody-mark transition">⟷</span>';
+}
+
+function renderCalendar() {
+  var months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  if (!$('calMonthTitle')) return;
+  $('calMonthTitle').textContent = months[calMonth] + ' ' + calYear;
+  renderProposals();
+  var namesEl = $('calDayNames');
+  namesEl.innerHTML = '';
+  ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].forEach(function(d) {
+    var el = document.createElement('div');
+    el.className = 'cal-day-name';
+    el.textContent = d;
+    namesEl.appendChild(el);
+  });
+  var grid = $('calGrid');
+  grid.innerHTML = '';
+  var days = new Date(calYear, calMonth + 1, 0).getDate();
+  var first = new Date(calYear, calMonth, 1).getDay();
+  var now = new Date();
+  for (var i = 0; i < first; i++) grid.appendChild(document.createElement('div'));
+  for (var d = 1; d <= days; d++) {
+    var c = getCustody(d);
+    var evs = getEvs(d);
+    var rems = remindersForDay(d);
+    var prop = pendingProposalForDay(d);
+    var btn = document.createElement('button');
+    btn.className = 'cal-day ' + c;
+    if (calYear === now.getFullYear() && calMonth === now.getMonth() && d === now.getDate()) btn.classList.add('today');
+    if (selDay === d) btn.classList.add('selected');
+    btn.innerHTML = (prop ? '<span class="prop-flag">Pend.</span>' : '') + '<div class="cal-num">' + d + '</div>' + custodySymbol(c) + (evs.length ? '<div class="event-line" title="Evento"></div>' : '') + (rems.length ? '<div class="reminder-line" title="Recordatorio"></div>' : '');
+    (function(day) {
+      btn.addEventListener('click', function() { selDay = day; renderCalendar(); renderDayDetail(); });
+    })(d);
+    grid.appendChild(btn);
+  }
+  if (selDay) renderDayDetail(); else hide('dayDetail');
+}
+
+function renderDayDetail() {
+  if (!selDay) { hide('dayDetail'); return; }
+  show('dayDetail');
+  $('detailDay').textContent = selDay;
+  var evs = getEvs(selDay);
+  var rems = remindersForDay(selDay);
+  var html = '';
+  html += '<div class="detail-card"><strong>Custodia:</strong> ' + (getCustody(selDay) === 'mama' ? p1() : getCustody(selDay) === 'papa' ? p2() : 'Cambio de casa ⟷') + '</div>';
+  if (evs.length) {
+    html += evs.map(function(e, idx) { return '<div class="detail-card"><strong>Evento:</strong> ' + e + '<button class="event-delete-btn" onclick="deleteEvent(' + idx + ')">Borrar</button></div>'; }).join('');
+  }
+  if (rems.length) {
+    html += rems.map(function(r) { return '<div class="detail-card"><strong>Recordatorio:</strong> ' + r.title + '<br><strong>Fecha:</strong> ' + fmtDateTime(r.date) + '<br><strong>Para:</strong> ' + fLbl(r.for) + '</div>'; }).join('');
+  }
+  var dayProps = proposalsForDay(selDay);
+  dayProps.forEach(function(pr) {
+    var owner = pr.createdBy === (USER && USER.uid) ? 'Tú' : (pr.createdByName || 'Copadre/madre');
+    var status = pr.status === 'pending' ? 'Pendiente de respuesta' : pr.status === 'accepted' ? 'Aprobada' : 'Rechazada';
+    html += '<div class="detail-card"><strong>Solicitud de cambio:</strong><br>Día ' + pr.fromDay + ' → Día ' + pr.toDay + '<br><strong>Solicitada por:</strong> ' + owner + '<br><strong>Enviada:</strong> ' + fmtDateTime(pr.createdAt || pr.date) + '<br><strong>Estado:</strong> ' + status + (pr.reason ? '<br><strong>Motivo:</strong> ' + pr.reason : '') + '</div>';
+  });
+  $('detailEvents').innerHTML = html;
+  lucide.createIcons();
+}
+
+async function deleteEvent(idx) {
+  if (!selDay || !FAMILY_ID) return;
+  var arr = getEvs(selDay).slice();
+  arr.splice(idx, 1);
+  var key = calKey();
+  var update = { events: {} };
+  update.events[selDay] = arr;
+  await db.collection('families').doc(FAMILY_ID).collection('calendar').doc(key).set(update, { merge: true });
+}
+
+async function saveEvent() {
+  var v = $('evInput').value.trim();
+  if (!v || !selDay || !FAMILY_ID) return;
+  var existing = getEvs(selDay);
+  var key = calKey();
+  var update = { events: {} };
+  update.events[selDay] = existing.concat([v]);
+  await db.collection('families').doc(FAMILY_ID).collection('calendar').doc(key).set(update, { merge: true });
+  $('evInput').value = '';
+  hide('evForm');
+}
+
+async function saveProp() {
+  var from = $('propFrom').value, to = $('propTo').value, reason = $('propReason').value;
+  if (!from || !to) return;
+  await famCol('proposals').add({
+    fromDay: from, toDay: to, reason: reason,
+    status: 'pending', date: new Date().toISOString().slice(0, 10),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    createdBy: USER.uid,
+    createdByName: USERDATA ? USERDATA.name : '',
+    createdByRole: myRole()
+  });
+  $('propFrom').value = ''; $('propTo').value = ''; $('propReason').value = '';
+  hide('propForm');
+}
+
+function renderProposals() {
+  var el = $('pendingProposals');
+  if (!el) return;
+  var pendingReceived = proposals.filter(function(p) { return p.status === 'pending' && p.createdBy !== (USER && USER.uid); });
+  var pendingSent = proposals.filter(function(p) { return p.status === 'pending' && p.createdBy === (USER && USER.uid); });
+  if (!pendingReceived.length && !pendingSent.length) { el.innerHTML = ''; return; }
+  el.innerHTML = '';
+  pendingReceived.forEach(function(pr) {
+    var div = document.createElement('div');
+    div.className = 'proposal-alert';
+    div.innerHTML = '<div><strong>Solicitud de cambio de custodia pendiente</strong><br>Cambio solicitado: Día ' + pr.fromDay + ' → Día ' + pr.toDay + '<br>Enviada: ' + fmtDateTime(pr.createdAt || pr.date) + (pr.reason ? '<br>' + pr.reason : '') + '</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-sm accept-btn" style="background:var(--success)">Aceptar</button><button class="btn-outline reject-btn">Rechazar</button></div>';
+    div.querySelector('.accept-btn').addEventListener('click', async function() { await famCol('proposals').doc(pr.id).update({ status: 'accepted', respondedAt: firebase.firestore.FieldValue.serverTimestamp(), respondedBy: USER.uid }); setCustody(Number(pr.toDay), 'transition'); });
+    div.querySelector('.reject-btn').addEventListener('click', function() { famCol('proposals').doc(pr.id).update({ status: 'rejected', respondedAt: firebase.firestore.FieldValue.serverTimestamp(), respondedBy: USER.uid }); });
+    el.appendChild(div);
+  });
+  pendingSent.forEach(function(pr) {
+    var div = document.createElement('div');
+    div.className = 'proposal-alert';
+    div.innerHTML = '<div><strong>Solicitud de cambio de custodia enviada</strong><br>Cambio solicitado: Día ' + pr.fromDay + ' → Día ' + pr.toDay + '<br>Enviada: ' + fmtDateTime(pr.createdAt || pr.date) + '<br>Esperando respuesta.</div>';
+    el.appendChild(div);
+  });
+}
+
+// --- GASTOS -------------------------------------------------
+
+const EXP_SUBCATS = {
+  'Educación': ['Matrícula','Colegiatura mensual','Academias / extra programáticas / refuerzo escolar','Útiles escolares','Uniformes','Transporte escolar','Casino / almuerzo / colación'],
+  'Salud': ['Seguro escolar','Isapre / Fonasa','Seguro complementario','Cita a especialistas','Tratamientos','Terapias'],
+  'Vida cotidiana': ['Celebraciones','Mesada','Celular / conectividad','Salidas / panoramas'],
+  'Gastos extraordinarios': ['Gasto puntual / no recurrente']
+};
+function updateExpenseSubcats() {
+  var cat = $('expCat') ? $('expCat').value : 'Educación';
+  var sel = $('expSubcat');
+  if (!sel) return;
+  sel.innerHTML = '';
+  (EXP_SUBCATS[cat] || []).forEach(function(v) {
+    var opt = document.createElement('option'); opt.value = v; opt.textContent = v; sel.appendChild(opt);
+  });
+}
+function treatmentLabel(v) {
+  if (v === 'pension') return 'Considerada en la pensión de alimentos · Registro no cobrable';
+  if (v === 'shared') return 'Compartido entre ambos';
+  if (v === 'mama_only') return 'Pagado solo por ' + p1();
+  if (v === 'papa_only') return 'Pagado solo por ' + p2();
+  return 'Compartido entre ambos';
+}
+function treatmentClass(v, paid) {
+  if (v === 'pension') return 'no-charge';
+  if (paid) return 'closed';
+  if (v === 'shared') return 'shared';
+  return 'pending';
+}
+
+function frequencyLabel(v) {
+  if (v === 'monthly') return 'Mensual';
+  if (v === 'annual') return 'Anual';
+  if (v === 'weekly') return 'Semanal';
+  return 'Único / puntual';
+}
+
+
+function fillPercentSelectors() {
+  var pm = $('pctMama'), pp = $('pctPapa');
+  if (!pm || !pp || pm.options.length) return;
+  for (var i = 0; i <= 100; i += 5) {
+    var om = document.createElement('option'); om.value = i; om.textContent = i + '%'; pm.appendChild(om);
+    var op = document.createElement('option'); op.value = i; op.textContent = i + '%'; pp.appendChild(op);
+  }
+  pm.value = 50; pp.value = 50;
+  pm.addEventListener('change', function(){ pp.value = 100 - Number(pm.value); updateExpenseTreatmentUI(); });
+  pp.addEventListener('change', function(){ pm.value = 100 - Number(pp.value); updateExpenseTreatmentUI(); });
+}
+
+function updateExpenseTreatmentUI() {
+  fillPercentSelectors();
+  var t = $('expTreatment') ? $('expTreatment').value : 'shared';
+  var cat = $('expCat') ? $('expCat').value : '';
+  var reimburse = $('reimburseBox');
+  var distBox = $('expDistributionBox');
+  var distHint = $('expDistributionHint');
+  var refundBox = $('expHealthRefundBox');
+  if (reimburse) reimburse.classList.toggle('hidden', t !== 'shared');
+  if (distBox) distBox.classList.toggle('hidden', t !== 'shared');
+  if (refundBox) refundBox.classList.toggle('hidden', cat !== 'Salud');
+  if (distHint) {
+    if (t === 'shared') distHint.textContent = 'Distribución: ' + p1() + ' ' + ($('pctMama') ? $('pctMama').value : 50) + '% · ' + p2() + ' ' + ($('pctPapa') ? $('pctPapa').value : 50) + '%';
+    else if (t === 'mama_only') distHint.textContent = 'Distribución: ' + p1() + ' 100%';
+    else if (t === 'papa_only') distHint.textContent = 'Distribución: ' + p2() + ' 100%';
+    else if (t === 'pension') distHint.textContent = 'Registro no cobrable considerado en la pensión de alimentos';
+    else distHint.textContent = '';
+  }
+}
+
+
+function setCurrency(c) {
+  expCurrency = c;
+  $('btnCLP').classList.toggle('cur-active', c === 'CLP');
+  $('btnUF').classList.toggle('cur-active', c === 'UF');
+  if (c === 'UF') show('ufHint'); else hide('ufHint');
+}
+
+function filterPeriod(list) {
+  var now = new Date(), y = now.getFullYear(), m = now.getMonth();
+  return list.filter(function(e) {
+    var d = new Date(e.date);
+    if (expPeriod === 'week') { var w = new Date(now); w.setDate(now.getDate() - 7); return d >= w; }
+    if (expPeriod === 'month') return d.getFullYear() === y && d.getMonth() === m;
+    if (expPeriod === 'year') return d.getFullYear() === y;
+    return true;
+  });
+}
+
+function toCLP(e) { return e.currency === 'UF' ? e.amount * UF : e.amount; }
+
+async function saveExp() {
+  var desc = $('expDesc').value.trim(), amt = $('expAmount').value;
+  if (!desc || !amt) return;
+  var tval = $('expTreatment') ? $('expTreatment').value : 'shared';
+  var pctM = tval === 'shared' ? Number(($('pctMama') && $('pctMama').value) || 50) : (tval === 'mama_only' ? 100 : 0);
+  var pctP = tval === 'shared' ? Number(($('pctPapa') && $('pctPapa').value) || 50) : (tval === 'papa_only' ? 100 : 0);
+  var f = $('expFile') && $('expFile').files && $('expFile').files[0] ? $('expFile').files[0].name : '';
+  var rf = $('expReimburseFile') && $('expReimburseFile').files && $('expReimburseFile').files[0] ? $('expReimburseFile').files[0].name : '';
+  await famCol('expenses').add({
+    description: desc, amount: Number(amt), currency: expCurrency,
+    paidBy: $('expPaidBy').value,
+    category: $('expCat').value,
+    subcategory: $('expSubcat') ? $('expSubcat').value : '',
+    frequency: $('expFrequency') ? $('expFrequency').value : 'unique',
+    treatment: $('expTreatment') ? $('expTreatment').value : 'shared',
+    attachmentName: f,
+    reimbursementAttachmentName: rf,
+    healthRefund: $('expHealthRefund') ? $('expHealthRefund').value : '',
+    pctMama: pctM,
+    pctPapa: pctP,
+    date: new Date().toISOString().slice(0, 10), paid: false, voided: false,
+    history: [{ action: 'Gasto registrado', at: new Date().toISOString(), by: USERDATA ? USERDATA.name : '' }],
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(), createdBy: USER.uid
+  });
+  $('expDesc').value = ''; $('expAmount').value = ''; if ($('expFile')) $('expFile').value = ''; if ($('expReimburseFile')) $('expReimburseFile').value = '';
+  hide('expForm');
+}
+
+function renderExpenses() {
+  if (!$('expStats')) return;
+  var vis = filterPeriod(expenses).filter(function(e){ return !e.voided; });
+  var chargeable = vis.filter(function(e) { return e.treatment !== 'pension'; });
+  var mT = vis.filter(function(e) { return e.paidBy === 'mama'; }).reduce(function(s, e) { return s + toCLP(e); }, 0);
+  var pT = vis.filter(function(e) { return e.paidBy === 'papa'; }).reduce(function(s, e) { return s + toCLP(e); }, 0);
+  var tot = vis.reduce(function(s, e) { return s + toCLP(e); }, 0);
+  var nonCharge = vis.filter(function(e) { return e.treatment === 'pension'; }).reduce(function(s, e) { return s + toCLP(e); }, 0);
+  var unp = chargeable.filter(function(e) { return !e.paid; }).reduce(function(s, e) { return s + toCLP(e); }, 0);
+  var netBase = chargeable.filter(function(e){ return e.treatment === 'shared'; });
+  var net = netBase.reduce(function(s, e) {
+    var amount = toCLP(e);
+    var mShould = amount * ((e.pctMama == null ? 50 : e.pctMama) / 100);
+    var mPaid = e.paidBy === 'mama' ? amount : 0;
+    return s + (mPaid - mShould);
+  }, 0);
+  $('expStats').innerHTML =
+    '<div class="stat-card" style="border-top-color:var(--accent)"><div class="stat-label">' + p1() + '</div><div class="stat-val">' + fmtCLP(mT) + '</div></div>' +
+    '<div class="stat-card" style="border-top-color:var(--primary-d)"><div class="stat-label">' + p2() + '</div><div class="stat-val">' + fmtCLP(pT) + '</div></div>' +
+    '<div class="stat-card" style="border-top-color:var(--warn)"><div class="stat-label">Total registrado</div><div class="stat-val">' + fmtCLP(tot) + '</div></div>' +
+    '<div class="stat-card" style="border-top-color:var(--beige)"><div class="stat-label">Registro no cobrable</div><div class="stat-val">' + fmtCLP(nonCharge) + '</div></div>';
+  if (Math.abs(net) < 1) {
+    $('balanceBar').innerHTML = '<span style="color:var(--success);font-weight:600">✓ Sin saldos compartidos pendientes</span>';
+  } else if (net > 0) {
+    $('balanceBar').innerHTML = p2() + ' debe <b style="color:var(--warn)">' + fmtCLP(net) + '</b> a ' + p1() + ' por gastos compartidos';
+  } else {
+    $('balanceBar').innerHTML = p1() + ' debe <b style="color:var(--warn)">' + fmtCLP(Math.abs(net)) + '</b> a ' + p2() + ' por gastos compartidos';
+  }
+  $('expCount').textContent = vis.length + ' registros';
+  var el = $('expList');
+  if (!vis.length) { el.innerHTML = '<p class="empty-state">Sin gastos en este período</p>'; return; }
+  el.innerHTML = '';
+  vis.forEach(function(ex) {
+    var row = document.createElement('div');
+    row.className = 'exp-row';
+    var isPaid = ex.paid || ex.treatment === 'pension';
+    var chipClass = treatmentClass(ex.treatment || 'shared', isPaid);
+    row.innerHTML =
+      '<div style="flex:1">' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
+          '<span style="font-weight:600;font-size:13px;color:var(--text)">' + ex.description + '</span>' +
+          '<span class="status-chip ' + chipClass + '">' + treatmentLabel(ex.treatment || 'shared') + '</span>' +
+        '</div>' +
+        '<div style="font-size:11px;color:var(--text-s)">' + ex.date + ' · ' + ex.category + (ex.subcategory ? ' · ' + ex.subcategory : '') + ' · ' + frequencyLabel(ex.frequency || 'unique') + (ex.treatment === 'shared' ? ' · Distribución: ' + p1() + ' ' + (ex.pctMama == null ? 50 : ex.pctMama) + '% / ' + p2() + ' ' + (ex.pctPapa == null ? 50 : ex.pctPapa) + '%' : '') + (ex.category === 'Salud' && ex.healthRefund ? ' · Reembolso salud: ' + (ex.healthRefund === 'yes' ? 'Sí genera' : ex.healthRefund === 'no' ? 'No genera' : 'Pendiente') : '') + ' · Pagado por: ' + (ex.paidBy === 'mama' ? p1() : p2()) + '</div>' +
+        (ex.attachmentName ? '<div class="file-pill">📎 Respaldo gasto: ' + ex.attachmentName + '</div>' : '') +
+        (ex.reimbursementAttachmentName ? '<div class="file-pill">📎 Respaldo reembolso: ' + ex.reimbursementAttachmentName + '</div>' : '') +
+      '</div>' +
+      '<div style="text-align:right;display:flex;align-items:center;gap:9px">' +
+        '<div>' +
+          '<div style="font-weight:700;font-size:14px;color:var(--text)">' + (ex.currency === 'UF' ? fmtUF(ex.amount) : fmtCLP(ex.amount)) + '</div>' +
+          (ex.currency === 'UF' ? '<div style="font-size:10px;color:var(--text-s)">' + fmtCLP(ex.amount * UF) + '</div>' : '') +
+        '</div>' +
+        '<button class="btn-outline toggle-paid-btn" style="padding:7px 10px">' + (ex.paid ? 'Confirmado' : 'Marcar OK') + '</button>' +
+        '<button class="btn-danger void-btn" title="Anular"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>' +
+      '</div>';
+    row.querySelector('.toggle-paid-btn').addEventListener('click', function() { famCol('expenses').doc(ex.id).update({ paid: !ex.paid, lastActionAt: firebase.firestore.FieldValue.serverTimestamp(), lastActionBy: USER.uid }); });
+    row.querySelector('.void-btn').addEventListener('click', function() { if (confirm('Este gasto no se eliminará. Quedará anulado en el historial.')) famCol('expenses').doc(ex.id).update({ voided: true, voidedAt: firebase.firestore.FieldValue.serverTimestamp(), voidedBy: USER.uid }); });
+    el.appendChild(row);
+  });
+}
+
+// --- MENSAJES -----------------------------------------------
+function renderQuickReplies() {
+  var el = $('quickReplies');
+  if (!el) return;
+  el.innerHTML = '';
+  [
+    'Hola, por favor, ¿puedes ir tú a buscar a los niños mañana?',
+    'Hola, te recuerdo que tiene hora al dentista el viernes. Gracias.',
+    'Hola, ¿podrías por favor comprar tú la cartulina? Y lo registramos en gastos.',
+    'Hola, te comento que mañana salen antes del colegio. ¿Cómo nos coordinamos?',
+    'Gracias por avisar.',
+    'Quedamos así entonces, gracias.'
+  ].forEach(function(t) {
+    var btn = document.createElement('button');
+    btn.className = 'quick-reply-btn';
+    btn.textContent = t;
+    btn.addEventListener('click', function() { $('msgInput').value = t; });
+    el.appendChild(btn);
+  });
+}
+
+function isPotentiallyOffensive(txt) {
+  var bad = ['idiota','imbécil','imbecil','estúpido','estupido','inútil','inutil','weon','hueon','mierda','conchetumadre','ctm','pendejo','descriteriado','irresponsable'];
+  var t = txt.toLowerCase();
+  return bad.some(function(w) { return t.indexOf(w) >= 0; });
+}
+
+async function sendMsg() {
+  var txt = $('msgInput').value.trim();
+  if (!txt) return;
+  if (isPotentiallyOffensive(txt)) {
+    var ok = confirm('Este mensaje podría interpretarse como ofensivo o poco colaborativo. ¿Quieres enviarlo igual?');
+    if (!ok) return;
+  }
+  await famCol('messages').add({
+    text: txt, senderName: USERDATA ? USERDATA.name : '',
+    senderRole: myRole(),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    createdBy: USER.uid
+  });
+  $('msgInput').value = '';
+}
+
+function renderMessages() {
+  var el = $('msgList');
+  if (!el) return;
+  if (!messages.length) { el.innerHTML = '<p style="text-align:center;color:var(--text-s);font-size:13px;margin:auto">Sin mensajes aún</p>'; return; }
+  el.innerHTML = messages.map(function(m) {
+    var isMe = m.createdBy === (USER && USER.uid);
+    var time = m.createdAt && m.createdAt.toDate ? m.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+    return '<div style="display:flex;justify-content:' + (isMe ? 'flex-end' : 'flex-start') + '"><div class="msg-bubble ' + (isMe ? 'me' : 'other') + '"><div class="msg-sender">' + (m.senderName || '') + '</div>' + m.text + '<div class="msg-time">' + time + '</div></div></div>';
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+// --- HIJOS --------------------------------------------------
+function calcAge(birth) {
+  if (!birth) return '';
+  var b = new Date(birth), n = new Date();
+  var age = n.getFullYear() - b.getFullYear();
+  var m = n.getMonth() - b.getMonth();
+  if (m < 0 || (m === 0 && n.getDate() < b.getDate())) age--;
+  return age;
+}
+function openKidForm(kid) {
+  $('kidFormTitle').textContent = kid ? 'Editar hijo' : 'Agregar hijo';
+  $('editKidId').value = kid ? kid.id : '';
+  $('kidName').value = kid ? kid.name || '' : '';
+  $('kidBirth').value = kid ? kid.birthDate || '' : '';
+  $('kidAge').value = kid && kid.birthDate ? calcAge(kid.birthDate) + ' años' : (kid ? kid.age || '' : '');
+  $('kidSchool').value = kid ? kid.school || '' : '';
+  $('kidDoctor').value = kid ? kid.doctor || '' : '';
+  $('kidClinic').value = kid ? kid.clinic || '' : '';
+  $('kidSchoolInsurance').value = kid ? kid.schoolInsurance || '' : '';
+  $('kidAllergies').value = kid ? kid.allergies || '' : '';
+  $('kidBlood').value = kid ? kid.bloodType || '' : '';
+  $('kidNotes').value = kid ? kid.notes || '' : '';
+  show('kidForm');
+}
+
+async function saveKid() {
+  var name = $('kidName').value.trim();
+  if (!name) return;
+  var data = {
+    name: name, birthDate: $('kidBirth').value, age: $('kidBirth').value ? calcAge($('kidBirth').value) : $('kidAge').value, school: $('kidSchool').value,
+    doctor: $('kidDoctor').value, clinic: $('kidClinic').value, schoolInsurance: $('kidSchoolInsurance').value, allergies: $('kidAllergies').value,
+    bloodType: $('kidBlood').value, notes: $('kidNotes').value
+  };
+  var id = $('editKidId').value;
+  if (id) await famCol('children').doc(id).update(data);
+  else await famCol('children').add(Object.assign(data, { createdAt: firebase.firestore.FieldValue.serverTimestamp(), createdBy: USER.uid }));
+  hide('kidForm');
+}
+
+function renderChildren() {
+  var el = $('kidList');
+  if (!el) return;
+  if (!children.length) { el.innerHTML = '<div class="empty-state">Agrega el perfil de tus hijos</div>'; return; }
+  el.innerHTML = '';
+  children.forEach(function(kid) {
+    var initials = (kid.name || '?').split(' ').map(function(w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML =
+      '<div class="card-body">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
+          '<div style="display:flex;gap:14px;align-items:center">' +
+            '<div class="kid-avatar">' + initials + '</div>' +
+            '<div>' +
+              '<h3 style="margin:0;font-size:16px;font-weight:700;color:var(--text)">' + kid.name + '</h3>' +
+              '<p style="margin:3px 0 0;color:var(--text-s);font-size:12px">' + (kid.birthDate ? calcAge(kid.birthDate) + ' años' : ((kid.age || '') + (kid.age ? ' años' : ''))) + '</p>' +
+            '</div>' +
+          '</div>' +
+          '<div style="display:flex;gap:7px">' +
+            '<button class="btn-outline edit-btn" style="padding:7px 12px"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>' +
+            '<button class="btn-danger del-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="info-grid">' +
+          '<div class="info-item"><div class="info-item-label">Fecha nacimiento</div><div class="info-item-val">' + (kid.birthDate || '-') + '</div></div>' +
+          '<div class="info-item"><div class="info-item-label">Colegio</div><div class="info-item-val">' + (kid.school || '-') + '</div></div>' +
+          '<div class="info-item"><div class="info-item-label">Doctor / Pediatra</div><div class="info-item-val">' + (kid.doctor || '-') + '</div></div>' +
+          '<div class="info-item"><div class="info-item-label">Clínica preferente</div><div class="info-item-val">' + (kid.clinic || '-') + '</div></div>' +
+          '<div class="info-item"><div class="info-item-label">Seguro escolar</div><div class="info-item-val">' + (kid.schoolInsurance || '-') + '</div></div>' +
+          '<div class="info-item"><div class="info-item-label">Grupo sanguíneo</div><div class="info-item-val">' + (kid.bloodType || '-') + '</div></div>' +
+          '<div class="info-item"><div class="info-item-label">Alergias</div><div class="info-item-val">' + (kid.allergies || '-') + '</div></div>' +
+        '</div>' +
+        (kid.notes ? '<div class="notes-box"><div style="font-size:10px;color:var(--primary);font-weight:700;margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px">Notas</div><div style="font-size:12px;color:var(--text);line-height:1.55">' + kid.notes + '</div></div>' : '') +
+      '</div>';
+    card.querySelector('.edit-btn').addEventListener('click', function() { openKidForm(kid); });
+    card.querySelector('.del-btn').addEventListener('click', function() { famCol('children').doc(kid.id).delete(); });
+    el.appendChild(card);
+  });
+}
+
+// --- ACUERDOS -----------------------------------------------
+async function saveAgr() {
+  var title = $('agrTitle').value.trim(), content = $('agrContent').value.trim();
+  if (!title || !content) return;
+  await famCol('agreements').add({
+    title: title, content: content,
+    category: $('agrCat').value, status: $('agrStatus').value,
+    date: new Date().toISOString().slice(0, 10),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(), createdBy: USER.uid
+  });
+  $('agrTitle').value = ''; $('agrContent').value = '';
+  hide('agrForm');
+}
+
+function renderAgreements() {
+  var el = $('agrList');
+  if (!el) return;
+  if (!agreements.length) { el.innerHTML = '<div class="empty-state">Sin acuerdos registrados</div>'; return; }
+  el.innerHTML = '';
+  var sColor = { 'Activo': 'var(--success)', 'En revisión': 'var(--warn)', 'Completado': 'var(--text-s)' };
+  agreements.forEach(function(agr) {
+    var isExp = expandedAgr === agr.id;
+    var sc = sColor[agr.status] || 'var(--text-s)';
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.style.marginBottom = '10px';
+    card.innerHTML =
+      '<div class="agr-header">' +
+        '<div>' +
+          '<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:7px">' +
+            '<span class="badge" style="background:' + sc.replace(')', '').replace('var(', '') + '22' + ';color:' + sc + ';border:1px solid ' + sc + '44">' + agr.status + '</span>' +
+            '<span class="badge" style="background:var(--bg);color:var(--text-s);border:1px solid var(--border)">' + agr.category + '</span>' +
+          '</div>' +
+          '<h3 style="margin:0;font-size:14px;font-weight:600;color:var(--text)">' + agr.title + '</h3>' +
+        '</div>' +
+        '<div style="display:flex;gap:7px;align-items:center">' +
+          '<span class="toggle-agr" style="cursor:pointer;color:var(--text-s);font-size:12px">' + (isExp ? '▲' : '▼') + '</span>' +
+          '<button class="btn-danger del-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>' +
+        '</div>' +
+      '</div>' +
+      (isExp ? '<div class="agr-body"><div class="agr-content">' + agr.content + '</div></div>' : '');
+    card.querySelector('.toggle-agr').addEventListener('click', function() { expandedAgr = isExp ? null : agr.id; renderAgreements(); });
+    card.querySelector('.del-btn').addEventListener('click', function() { famCol('agreements').doc(agr.id).delete(); });
+    el.appendChild(card);
+  });
+}
+
+// --- RECORDATORIOS ------------------------------------------
+async function saveRem() {
+  var title = $('remTitle').value.trim(), date = $('remDate').value;
+  if (!title || !date) return;
+  await famCol('reminders').add({
+    title: title, date: date, for: $('remFor').value, done: false,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(), createdBy: USER.uid
+  });
+  $('remTitle').value = ''; $('remDate').value = '';
+  hide('remForm');
+}
+
+function fLbl(f) { return f === 'both' ? 'Ambos' : f === 'mama' ? p1() : p2(); }
+function fColor(f) { return f === 'both' ? '#8A8A78' : f === 'mama' ? 'var(--accent)' : 'var(--primary-d)'; }
+
+function renderReminders() {
+  var el = $('remList');
+  if (!el) return;
+  var up = reminders.filter(function(r) { return !r.done; }).sort(function(a, b) { return new Date(a.date) - new Date(b.date); });
+  var done = reminders.filter(function(r) { return r.done; });
+  if (!reminders.length) { el.innerHTML = '<div class="empty-state">Sin recordatorios</div>'; return; }
+  el.innerHTML = '';
+  if (up.length) {
+    var hdr = document.createElement('p');
+    hdr.className = 'section-lbl';
+    hdr.textContent = 'Próximos';
+    el.appendChild(hdr);
+    var card = document.createElement('div');
+    card.className = 'card';
+    up.forEach(function(r) {
+      var d = new Date(r.date);
+      var near = (d - new Date()) < 86400000 * 3;
+      var fc = fColor(r.for);
+      var row = document.createElement('div');
+      row.className = 'rem-row';
+      row.innerHTML =
+        '<div style="flex:1">' +
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:5px">' +
+            (near ? '<span class="badge" style="background:rgba(216,164,95,.15);color:var(--warn);border:1px solid rgba(216,164,95,.3)">Pronto</span>' : '') +
+            '<span class="badge" style="background:rgba(0,0,0,.05);color:' + fc + '">' + fLbl(r.for) + '</span>' +
+          '</div>' +
+          '<div class="rem-title">' + r.title + '</div>' +
+          '<div class="rem-meta">' + d.toLocaleDateString('es-CL', { weekday: 'short', month: 'short', day: 'numeric' }) + ' · ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:7px">' +
+          '<button class="btn-done done-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></button>' +
+          '<button class="btn-danger del-btn"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>' +
+        '</div>';
+      row.querySelector('.done-btn').addEventListener('click', function() { famCol('reminders').doc(r.id).update({ done: true }); });
+      row.querySelector('.del-btn').addEventListener('click', function() { famCol('reminders').doc(r.id).delete(); });
+      card.appendChild(row);
+    });
+    el.appendChild(card);
+  }
+  if (done.length) {
+    var hdr2 = document.createElement('p');
+    hdr2.className = 'section-lbl';
+    hdr2.style.marginTop = '16px';
+    hdr2.textContent = 'Completados';
+    el.appendChild(hdr2);
+    done.forEach(function(r) {
+      var row = document.createElement('div');
+      row.style.cssText = 'background:var(--surface);border-radius:11px;padding:11px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;opacity:.45;border:1px solid var(--border)';
+      row.innerHTML = '<div style="font-weight:600;font-size:12px;text-decoration:line-through;color:var(--text-s)">' + r.title + '</div><button class="btn-undo undone-btn"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13C5.5 7 12 5 17 8s6.5 9.5 2 14"/></svg></button>';
+      row.querySelector('.undone-btn').addEventListener('click', function() { famCol('reminders').doc(r.id).update({ done: false }); });
+      el.appendChild(row);
+    });
+  }
+}
+
+// --- RECURSOS -----------------------------------------------
+function renderResources() {
+  var el = $('resourcesList');
+  if (!el) return;
+  var resources = [
+    { icon: '⚖️', title: 'Mediación Familiar', sub: 'mediacion.cl', desc: 'Servicio gratuito del Estado para resolver conflictos sin ir a juicio.', tag: 'Gratuito', link: 'https://www.mediacion.cl' },
+    { icon: '🏛', title: 'Poder Judicial', sub: 'pjud.cl', desc: 'Tribunales de Familia. Consulta causas y agenda horas.', tag: 'Oficial', link: 'https://www.pjud.cl' },
+    { icon: '👶', title: 'Fono Niños - 147', sub: 'SENAME', desc: 'Protección de derechos de niños. Atención gratuita y confidencial.', tag: 'Emergencia', link: 'tel:147' },
+    { icon: '📋', title: 'Corp. Asistencia Judicial', sub: '600 442 2000', desc: 'Asesoría legal gratuita.', tag: 'Gratuito', link: 'tel:6004422000' }
+  ];
+  el.innerHTML = '';
+  resources.forEach(function(r) {
+    var card = document.createElement('div');
+    card.className = 'resource-card';
+    card.innerHTML =
+      '<div class="resource-icon" style="background:rgba(95,124,110,.1)">' + r.icon + '</div>' +
+      '<div style="flex:1">' +
+        '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:5px">' +
+          '<div><div class="resource-title">' + r.title + '</div><div class="resource-sub">' + r.sub + '</div></div>' +
+          '<span class="badge" style="background:rgba(95,124,110,.1);color:var(--primary);border:1px solid rgba(95,124,110,.2);height:fit-content">' + r.tag + '</span>' +
+        '</div>' +
+        '<div class="resource-desc">' + r.desc + '</div>' +
+        '<a href="' + r.link + '" target="_blank" class="resource-link">Acceder</a>' +
+      '</div>';
+    el.appendChild(card);
+  });
+}
+</script>
+
+</body>
+</html>
