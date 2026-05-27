@@ -579,10 +579,11 @@ nav button.active { color: var(--primary-d); border-bottom-color: var(--accent);
 .custody-mark { font-size: 11px; font-weight: 800; letter-spacing: .2px; line-height: 1; }
 .custody-mark.mama { color: var(--accent); }
 .custody-mark.papa { color: var(--primary-d); }
-.custody-mark.transition { font-size: 12px; filter: saturate(.75); opacity: .86; }
+.custody-mark.transition { font-size: 14px; opacity: .86; color: var(--taupe); font-weight: 800; }
 .cal-day.transition { background: rgba(231,221,207,.42); border-color: rgba(182,166,146,.45); }
 .event-line { width: 58%; height: 3px; border-radius: 999px; background: var(--primary); opacity: .75; margin-top: 2px; }
-.prop-flag { position:absolute; top:3px; right:4px; font-size:10px; line-height:1; opacity:.9; }
+.reminder-line { width: 58%; height: 3px; border-radius: 999px; background: var(--warn); opacity: .75; margin-top: 2px; }
+.prop-flag { position:absolute; top:3px; right:3px; font-size:8px; line-height:1; padding:2px 4px; border-radius:999px; background:rgba(216,137,92,.16); color:var(--accent); border:1px solid rgba(216,137,92,.28); font-weight:800; letter-spacing:.1px; }
 .proposal-alert { background: rgba(216,137,92,.10); border: 1px solid rgba(216,137,92,.25); color: var(--primary-d); border-radius: 13px; padding: 12px 14px; margin-bottom: 14px; font-size: 12px; display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
 .proposal-alert strong { color: var(--text); }
 .detail-card { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: 11px 13px; margin-bottom: 8px; font-size: 12px; color: var(--text-s); }
@@ -783,14 +784,14 @@ main { padding-top: 30px !important; }
 }
 .custody-mark.mama { color: var(--accent) !important; }
 .custody-mark.papa { color: var(--primary-d) !important; }
-.custody-mark.transition { font-size: 14px !important; opacity: .86 !important; filter: saturate(.75) !important; }
+.custody-mark.transition { font-size: 15px !important; opacity: .9 !important; color: var(--taupe) !important; font-weight: 800 !important; }
 .event-line {
   background: var(--primary) !important;
   height: 3px !important;
   width: 54% !important;
   opacity: .62 !important;
 }
-.prop-flag { font-size: 11px !important; opacity: .75 !important; }
+.prop-flag { font-size: 8px !important; opacity: 1 !important; }
 .proposal-alert {
   background: rgba(242,231,219,.72) !important;
   border: 1px solid rgba(197,106,69,.22) !important;
@@ -1148,12 +1149,12 @@ footer {
         <span style="color:var(--text);font-weight:700;font-size:13px">Historial</span>
         <span id="expCount" style="font-size:11px;color:var(--text-s);font-weight:400;margin-left:8px"></span>
       </div>
-      <div class="period-filter" style="margin-bottom:0;max-width:360px;min-width:260px">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:10px;color:var(--text-s);font-weight:700;text-transform:uppercase;letter-spacing:.6px">Periodo</span><div class="period-filter" style="margin-bottom:0;max-width:360px;min-width:260px">
         <button class="active" data-period="week">Semana</button>
         <button data-period="month">Mes</button>
         <button data-period="year">Año</button>
         <button data-period="all">Todo</button>
-      </div>
+      </div></div>
     </div>
     <div id="expList"></div>
   </div>
@@ -1670,6 +1671,13 @@ function fetchUF() {
 function calKey() { return calYear + '-' + String(calMonth + 1).padStart(2, '0'); }
 function getCustody(d) { return custodyMap[calKey()] && custodyMap[calKey()][d] ? custodyMap[calKey()][d] : (d % 7 < 3 ? 'mama' : d % 7 === 3 ? 'transition' : 'papa'); }
 function getEvs(d) { return calEventsMap[calKey()] && calEventsMap[calKey()][d] ? calEventsMap[calKey()][d] : []; }
+function remindersForDay(day) {
+  return reminders.filter(function(r) {
+    if (!r.date) return false;
+    var rd = new Date(r.date);
+    return rd.getFullYear() === calYear && rd.getMonth() === calMonth && rd.getDate() === day && !r.done;
+  });
+}
 
 function setCustody(d, val) {
   if (!FAMILY_ID) return;
@@ -1708,7 +1716,7 @@ function proposalsForDay(day) { return proposals.filter(function(pr) { return pr
 function custodySymbol(c) {
   if (c === 'mama') return '<span class="custody-mark mama">M</span>';
   if (c === 'papa') return '<span class="custody-mark papa">P</span>';
-  return '<span class="custody-mark transition">🔄</span>';
+  return '<span class="custody-mark transition">⟷</span>';
 }
 
 function renderCalendar() {
@@ -1733,12 +1741,13 @@ function renderCalendar() {
   for (var d = 1; d <= days; d++) {
     var c = getCustody(d);
     var evs = getEvs(d);
+    var rems = remindersForDay(d);
     var prop = pendingProposalForDay(d);
     var btn = document.createElement('button');
     btn.className = 'cal-day ' + c;
     if (calYear === now.getFullYear() && calMonth === now.getMonth() && d === now.getDate()) btn.classList.add('today');
     if (selDay === d) btn.classList.add('selected');
-    btn.innerHTML = (prop ? '<span class="prop-flag">🏳️</span>' : '') + '<div class="cal-num">' + d + '</div>' + custodySymbol(c) + (evs.length ? '<div class="event-line" title="Evento"></div>' : '');
+    btn.innerHTML = (prop ? '<span class="prop-flag">Pend.</span>' : '') + '<div class="cal-num">' + d + '</div>' + custodySymbol(c) + (evs.length ? '<div class="event-line" title="Evento"></div>' : '') + (rems.length ? '<div class="reminder-line" title="Recordatorio"></div>' : '');
     (function(day) {
       btn.addEventListener('click', function() { selDay = day; renderCalendar(); renderDayDetail(); });
     })(d);
@@ -1752,15 +1761,19 @@ function renderDayDetail() {
   show('dayDetail');
   $('detailDay').textContent = selDay;
   var evs = getEvs(selDay);
+  var rems = remindersForDay(selDay);
   var html = '';
-  html += '<div class="detail-card"><strong>Custodia:</strong> ' + (getCustody(selDay) === 'mama' ? p1() : getCustody(selDay) === 'papa' ? p2() : 'Cambio de casa 🔄') + '</div>';
+  html += '<div class="detail-card"><strong>Custodia:</strong> ' + (getCustody(selDay) === 'mama' ? p1() : getCustody(selDay) === 'papa' ? p2() : 'Cambio de casa ⟷') + '</div>';
   if (evs.length) {
     html += evs.map(function(e) { return '<div class="detail-card"><strong>Evento:</strong> ' + e + '</div>'; }).join('');
+  }
+  if (rems.length) {
+    html += rems.map(function(r) { return '<div class="detail-card"><strong>Recordatorio:</strong> ' + r.title + '<br><strong>Fecha:</strong> ' + fmtDateTime(r.date) + '<br><strong>Para:</strong> ' + fLbl(r.for) + '</div>'; }).join('');
   }
   var dayProps = proposalsForDay(selDay);
   dayProps.forEach(function(pr) {
     var owner = pr.createdBy === (USER && USER.uid) ? 'Tú' : (pr.createdByName || 'Copadre/madre');
-    var status = pr.status === 'pending' ? 'Pendiente de aprobación 🏳️' : pr.status === 'accepted' ? 'Aprobada' : 'Rechazada';
+    var status = pr.status === 'pending' ? 'Pendiente de aprobación' : pr.status === 'accepted' ? 'Aprobada' : 'Rechazada';
     html += '<div class="detail-card"><strong>Solicitud de cambio:</strong><br>Día ' + pr.fromDay + ' → Día ' + pr.toDay + '<br><strong>Solicitada por:</strong> ' + owner + '<br><strong>Enviada:</strong> ' + fmtDateTime(pr.createdAt || pr.date) + '<br><strong>Estado:</strong> ' + status + (pr.reason ? '<br><strong>Motivo:</strong> ' + pr.reason : '') + '</div>';
   });
   $('detailEvents').innerHTML = html;
@@ -1804,7 +1817,7 @@ function renderProposals() {
   pendingReceived.forEach(function(pr) {
     var div = document.createElement('div');
     div.className = 'proposal-alert';
-    div.innerHTML = '<div><strong>Solicitud pendiente 🏳️</strong><br>Día ' + pr.fromDay + ' → Día ' + pr.toDay + '<br>Enviada: ' + fmtDateTime(pr.createdAt || pr.date) + (pr.reason ? '<br>' + pr.reason : '') + '</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-sm accept-btn" style="background:var(--success)">Aceptar</button><button class="btn-outline reject-btn">Rechazar</button></div>';
+    div.innerHTML = '<div><strong>Solicitud pendiente</strong><br>Día ' + pr.fromDay + ' → Día ' + pr.toDay + '<br>Enviada: ' + fmtDateTime(pr.createdAt || pr.date) + (pr.reason ? '<br>' + pr.reason : '') + '</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-sm accept-btn" style="background:var(--success)">Aceptar</button><button class="btn-outline reject-btn">Rechazar</button></div>';
     div.querySelector('.accept-btn').addEventListener('click', async function() { await famCol('proposals').doc(pr.id).update({ status: 'accepted', respondedAt: firebase.firestore.FieldValue.serverTimestamp(), respondedBy: USER.uid }); setCustody(Number(pr.toDay), 'transition'); });
     div.querySelector('.reject-btn').addEventListener('click', function() { famCol('proposals').doc(pr.id).update({ status: 'rejected', respondedAt: firebase.firestore.FieldValue.serverTimestamp(), respondedBy: USER.uid }); });
     el.appendChild(div);
@@ -1812,7 +1825,7 @@ function renderProposals() {
   pendingSent.forEach(function(pr) {
     var div = document.createElement('div');
     div.className = 'proposal-alert';
-    div.innerHTML = '<div><strong>Solicitud enviada 🏳️</strong><br>Día ' + pr.fromDay + ' → Día ' + pr.toDay + '<br>Enviada: ' + fmtDateTime(pr.createdAt || pr.date) + '<br>Esperando respuesta.</div>';
+    div.innerHTML = '<div><strong>Solicitud enviada</strong><br>Día ' + pr.fromDay + ' → Día ' + pr.toDay + '<br>Enviada: ' + fmtDateTime(pr.createdAt || pr.date) + '<br>Esperando respuesta.</div>';
     el.appendChild(div);
   });
 }
